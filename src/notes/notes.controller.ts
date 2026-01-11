@@ -14,31 +14,26 @@ import { CreateNoteDto } from './dto/create-note.dto';
 import { UpdateNoteDto } from './dto/update-note.dto';
 import { JsonExportStrategy } from './strategies/json-export.strategy';
 import { CsvExportStrategy } from './strategies/csv-export.strategy';
-import { NotesRepository } from './notes.repository';
 
 @Controller('notes')
 export class NotesController {
-  private readonly notesService: NotesService;
-
-  constructor() {
-    const notesRepository = new NotesRepository();
-    this.notesService = new NotesService(notesRepository);
-  }
+  constructor(private readonly notesService: NotesService) {}
 
   @Get()
-  async getAll() {
-    console.log('--- Obteniendo todas las notas ---');
-    const notes = await this.notesService.getAllNotes();
-    console.log(notes);
-    return notes;
+  getAll() {
+    return this.notesService.getAllNotes();
   }
 
   @Get('export')
   async exportNotes(@Query('format') format: string) {
-    if (format === 'csv') {
-      return this.notesService.exportNotes(new CsvExportStrategy());
+    // Por defecto, la estrategia será JSON
+    let strategy = new JsonExportStrategy();
+
+    if (format?.toLowerCase() === 'csv') {
+      strategy = new CsvExportStrategy();
     }
-    return this.notesService.exportNotes(new JsonExportStrategy());
+
+    return this.notesService.exportNotes(strategy);
   }
 
   @Get(':id')
@@ -52,7 +47,10 @@ export class NotesController {
   }
 
   @Put(':id')
-  update(@Param('id', ParseUUIDPipe) id: string, @Body() updateNoteDto: UpdateNoteDto) {
+  update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() updateNoteDto: UpdateNoteDto,
+  ) {
     return this.notesService.updateNote(id, updateNoteDto);
   }
 

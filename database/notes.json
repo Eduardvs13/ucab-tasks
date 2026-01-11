@@ -1,9 +1,23 @@
 [
   {
     "id": "550e8400-e29b-41d4-a716-446655440000",
-    "titulo": "Nota de prueba",
+    "titulo": "Título actualizado",
     "contenido": "Contenido secreto",
     "fechaCreacion": "2026-01-11T10:00:00.000Z",
-    "fechaModificacion": "2026-01-11T10:00:00.000Z"
+    "fechaModificacion": "2026-01-11T22:42:04.282Z"
+  },
+  {
+    "id": "aafc05cb-bc3a-4485-9ab6-2b1dbdae913f",
+    "contenido": "El contenido",
+    "fechaCreacion": "2026-01-11T22:32:40.087Z",
+    "fechaModificacion": "2026-01-11T22:36:26.630Z",
+    "titulo": "Nota cereadel"
+  },
+  {
+    "id": "583e63b0-6394-4922-8b4b-ece6ae186ace",
+    "titulo": "Nota para pruebas avanzadas",
+    "contenido": "Contenido inicial.",
+    "fechaCreacion": "2026-01-11T22:39:57.059Z",
+    "fechaModificacion": "2026-01-11T22:39:57.059Z"
   }
 ]

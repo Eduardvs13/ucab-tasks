@@ -30,17 +30,15 @@ export class NotesService {
     // 1. Verificamos que la nota exista. Si no, esto lanza un NotFoundException.
     const existingNote = await this.getNoteById(id);
 
-    // 2. Creamos el objeto con los datos actualizados.
-    const updatedNoteData = {
-      ...existingNote,
-      ...updateNoteDto,
-    };
+    // 2. Determinamos los nuevos valores, usando los existentes como fallback.
+    const nuevoTitulo = updateNoteDto.titulo ?? existingNote.titulo;
+    const nuevoContenido = updateNoteDto.contenido ?? existingNote.contenido;
 
-    // 3. Llamamos al repositorio para que actualice los datos.
+    // 3. Llamamos al repositorio para que actualice los datos con los valores correctos.
     const updatedNote = await this.notesRepository.update(
       id,
-      updatedNoteData.titulo,
-      updatedNoteData.contenido,
+      nuevoTitulo,
+      nuevoContenido,
     );
 
     // 4. Verificamos el resultado del repositorio.
