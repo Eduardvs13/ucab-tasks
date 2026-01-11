@@ -21,78 +21,73 @@
   <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Description
+# Ucab Tasks - API de Notas
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Este proyecto es una API REST para una aplicación de toma de notas, construida con [NestJS](https://nestjs.com/). El objetivo es crear un servidor modular, escalable y fácil de mantener, aplicando patrones de diseño de software.
 
-## Project setup
+## Características Implementadas
 
-```bash
-$ npm install
-```
+- **Gestión de Notas (CRUD):**
+  - Crear una nueva nota.
+  - Obtener una lista de todas las notas.
+  - Obtener una nota específica por su ID.
+  - Actualizar una nota existente.
+  - Eliminar una nota.
+- **Persistencia de Datos:** Los datos de las notas se guardan en un archivo `database/notes.json`.
+- **Exportación de Datos:** Las notas se pueden exportar en diferentes formatos (actualmente JSON y CSV).
 
-## Compile and run the project
+## Arquitectura y Patrones de Diseño
 
-```bash
-# development
-$ npm run start
+La aplicación sigue una arquitectura de 3 capas para asegurar la separación de responsabilidades y la modularidad.
 
-# watch mode
-$ npm run start:dev
+1.  **Capa de Presentación (Controller):**
+    - `NotesController`: Expone los endpoints de la API REST. Es el punto de entrada para las solicitudes del cliente.
 
-# production mode
-$ npm run start:prod
-```
+2.  **Capa de Lógica de Negocio (Service):**
+    - `NotesService`: Contiene la lógica de negocio. Orquesta las operaciones y aplica las reglas (ej. validaciones).
 
-## Run tests
+3.  **Capa de Acceso a Datos (Repository):**
+    - `NotesRepository`: Encapsula la lógica para interactuar con la fuente de datos (el archivo JSON).
 
-```bash
-# unit tests
-$ npm run test
+### Patrones de Diseño Aplicados
 
-# e2e tests
-$ npm run test:e2e
+- **Repository Pattern:** El `NotesService` depende de la abstracción del `NotesRepository`, no de una implementación concreta. Esto desacopla la lógica de negocio de la persistencia de datos, permitiendo cambiar la base de datos en el futuro (ej. de JSON a SQL) sin afectar el resto de la aplicación.
 
-# test coverage
-$ npm run test:cov
-```
+- **Strategy Pattern:** Se utiliza para la funcionalidad de exportación.
+  - Una interfaz `ExportStrategy` define un contrato para diferentes algoritmos de exportación.
+  - Clases concretas como `JsonExportStrategy` y `CsvExportStrategy` implementan la lógica para cada formato.
+  - El `NotesService` utiliza la estrategia seleccionada para exportar los datos, permitiendo añadir nuevos formatos de manera sencilla y sin modificar el servicio.
 
-## Deployment
+- **Inyección de Dependencias (Dependency Injection):** Utilizado en todo el proyecto y gestionado por el contenedor de Inversión de Control (IoC) de NestJS. Las clases reciben sus dependencias (ej. el servicio recibe el repositorio) en lugar de crearlas, lo que aumenta la modularidad y facilita las pruebas.
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+## API Endpoints
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+| Método | Ruta                  | Descripción                               |
+| :----- | :-------------------- | :---------------------------------------- |
+| `GET`  | `/notes`              | Obtiene todas las notas.                  |
+| `GET`  | `/notes/:id`          | Obtiene una nota por su ID.               |
+| `POST` | `/notes`              | Crea una nueva nota.                      |
+| `PUT`  | `/notes/:id`          | Actualiza una nota existente.             |
+| `DELETE`| `/notes/:id`          | Elimina una nota.                         |
+| `GET`  | `/notes/export`       | Exporta todas las notas en formato JSON.  |
+| `GET`  | `/notes/export?format=csv` | Exporta todas las notas en formato CSV.   |
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
+## Cómo Empezar
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+1.  **Clonar el repositorio:**
+    ```bash
+    git clone <url-del-repositorio>
+    cd ucab-tasks
+    ```
 
-## Resources
+2.  **Instalar dependencias:**
+    ```bash
+    npm install
+    ```
 
-Check out a few resources that may come in handy when working with NestJS:
+3.  **Ejecutar la aplicación en modo de desarrollo:**
+    ```bash
+    npm run start:dev
+    ```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+La API estará disponible en `http://localhost:3000`.

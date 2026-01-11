@@ -34,17 +34,26 @@ export class NotesRepository {
   async update(id: string, titulo: string, contenido: string): Promise<Note | null> {
     const notes = await this.findAll();
     const noteIndex = notes.findIndex((n) => n.id === id);
+
     if (noteIndex === -1) {
+      // Esta condición no debería ocurrir si el servicio funciona bien,
+      // pero es una buena práctica mantenerla como salvaguarda.
       return null;
     }
-    const updatedNote = {
-      ...notes[noteIndex],
-      titulo,
-      contenido,
+
+    // Asegúrate de mantener los datos que no se modifican
+    const originalNote = notes[noteIndex];
+    const updatedNote: Note = {
+      ...originalNote,
+      titulo: titulo,
+      contenido: contenido,
       fechaModificacion: new Date(),
     };
+
     notes[noteIndex] = updatedNote;
     await fs.writeFile(dbPath, JSON.stringify(notes, null, 2));
+    
+    // Devuelve la nota completamente actualizada.
     return updatedNote;
   }
 
