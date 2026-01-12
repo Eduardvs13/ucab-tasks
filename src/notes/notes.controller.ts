@@ -14,14 +14,15 @@ import { CreateNoteDto } from './dto/create-note.dto';
 import { UpdateNoteDto } from './dto/update-note.dto';
 import { JsonExportStrategy } from './strategies/json-export.strategy';
 import { CsvExportStrategy } from './strategies/csv-export.strategy';
+import { ListNotesQueryDto } from './dto/list-notes.dto';
 
 @Controller('notes')
 export class NotesController {
-  constructor(private readonly notesService: NotesService) {}
+  constructor(private readonly notesService: NotesService) { }
 
   @Get()
-  getAll() {
-    return this.notesService.getAllNotes();
+  getAll(@Query() query: ListNotesQueryDto) {
+    return this.notesService.getAllNotes(query);
   }
 
   @Get('export')
@@ -34,6 +35,15 @@ export class NotesController {
     }
 
     return this.notesService.exportNotes(strategy);
+  }
+
+  @Get('date')
+  async getByDate(
+    @Query('date') date: string,
+    @Query('field') field?: 'created' | 'modified',
+    @Query('order') order?: 'asc' | 'desc',
+  ) {
+    return this.notesService.getNotesByDate(date, field ?? 'created', order ?? 'asc');
   }
 
   @Get(':id')
@@ -55,7 +65,7 @@ export class NotesController {
   }
 
   @Delete(':id')
-  delete(@Param('id', ParseUUIDPipe) id: string) {
+  delete(@Param('id') id: string) {
     return this.notesService.deleteNote(id);
   }
 }

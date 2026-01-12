@@ -1,23 +1,79 @@
 [
   {
-    "id": "550e8400-e29b-41d4-a716-446655440000",
-    "titulo": "Título actualizado",
-    "contenido": "Contenido secreto",
-    "fechaCreacion": "2026-01-11T10:00:00.000Z",
-    "fechaModificacion": "2026-01-11T22:42:04.282Z"
-  },
-  {
-    "id": "aafc05cb-bc3a-4485-9ab6-2b1dbdae913f",
-    "contenido": "El contenido",
-    "fechaCreacion": "2026-01-11T22:32:40.087Z",
-    "fechaModificacion": "2026-01-11T22:36:26.630Z",
-    "titulo": "Nota cereadel"
-  },
-  {
     "id": "583e63b0-6394-4922-8b4b-ece6ae186ace",
-    "titulo": "Nota para pruebas avanzadas",
-    "contenido": "Contenido inicial.",
-    "fechaCreacion": "2026-01-11T22:39:57.059Z",
-    "fechaModificacion": "2026-01-11T22:39:57.059Z"
+    "title": "Nota para pruebas avanzadas",
+    "content": "content inicial.",
+    "creationDate": "2026-01-11T22:39:57.059Z",
+    "modificationDate": "2026-01-11T22:39:57.059Z"
+  },
+  {
+    "id": "9c8b7a6d-5e4f-4321-8a7b-6c5d4e3f2a10",
+    "title": "Notas de reunión con cliente",
+    "content": "Solicitan performance en listados y ocultar contenido en resumen.",
+    "creationDate": "2026-01-07T16:30:00.000Z",
+    "modificationDate": "2026-01-07T18:05:00.000Z"
+  },
+  {
+    "id": "a1b2c3d4-e5f6-47a8-9b0c-d1e2f3a4b5c6",
+    "title": "Recordatorio de deploy",
+    "content": "Preparar release notes y validar rollback plan.",
+    "creationDate": "2026-01-06T08:00:00.000Z",
+    "modificationDate": "2026-01-10T10:25:00.000Z"
+  },
+  {
+    "id": "0f1e2d3c-4b5a-6789-0abc-def123456789",
+    "title": "Borrador de postmortem",
+    "content": "Incidente 2026-01-05: causa raíz en timeout del gateway.",
+    "creationDate": "2026-01-05T20:12:00.000Z",
+    "modificationDate": "2026-01-06T09:00:00.000Z"
+  },
+  {
+    "id": "11111111-2222-3333-4444-555555555555",
+    "title": "Checklist QA",
+    "content": "Pruebas e2e, validación DTOs, export JSON/CSV, borrar por lote.",
+    "creationDate": "2026-01-04T12:45:00.000Z",
+    "modificationDate": "2026-01-11T12:00:00.000Z"
+  },
+  {
+    "id": "abcd1234-5678-4abc-8def-0123456789ab",
+    "title": "Plan de mejoras",
+    "content": "Implementar paginación y búsqueda por título.",
+    "creationDate": "2026-01-03T07:30:00.000Z",
+    "modificationDate": "2026-01-09T21:15:00.000Z"
+  },
+  {
+    "id": "c0ffee00-babe-4dad-8bee-deadbeef0001",
+    "title": "Doc técnica",
+    "content": "Estructura de capas: controller, service, repository y strategies.",
+    "creationDate": "2026-01-02T14:10:00.000Z",
+    "modificationDate": "2026-01-02T16:40:00.000Z"
+  },
+  {
+    "id": "feedface-1234-4abc-9def-0123feedc0de",
+    "title": "Análisis de rendimiento",
+    "content": "Indexación por título y fechas; evitar parse redundante de JSON.",
+    "creationDate": "2026-01-01T10:00:00.000Z",
+    "modificationDate": "2026-01-11T10:00:00.000Z"
+  },
+  {
+    "id": "7890abcd-1234-5678-90ab-cdef12345678",
+    "title": "Notas personales",
+    "content": "Probar filtros por createdAt y updatedAt en UI.",
+    "creationDate": "2025-12-31T23:50:00.000Z",
+    "modificationDate": "2026-01-01T08:20:00.000Z"
+  },
+  {
+    "id": "13579bdf-2468-4ace-9bdf-13579bdf2468",
+    "title": "Backlog de bugs",
+    "content": "Arreglar ordenamiento por fecha y locales de comparación.",
+    "creationDate": "2026-01-10T09:00:00.000Z",
+    "modificationDate": "2026-01-10T11:35:00.000Z"
+  },
+  {
+    "id": "02468ace-1357-4bdf-9ace-02468ace1357",
+    "title": "Tareas de infra",
+    "content": "Agregar backups al database/notes.json y rotación semanal.",
+    "creationDate": "2026-01-11T06:12:00.000Z",
+    "modificationDate": "2026-01-11T07:45:00.000Z"
   }
 ]

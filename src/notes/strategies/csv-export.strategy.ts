@@ -4,7 +4,7 @@ import { ExportStrategy } from './export.strategy';
 export class CsvExportStrategy implements ExportStrategy {
   export(notes: Note[]): string {
     if (notes.length === 0) {
-      return 'id,titulo,contenido,fechaCreacion,fechaModificacion';
+      return 'id,titlecontent,creationDate,modificationDate';
     }
 
     const headers = Object.keys(notes[0]).join(',');
