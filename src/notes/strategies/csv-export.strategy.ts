@@ -1,7 +1,12 @@
 import { Note } from '../entities/note.entity';
 import { ExportStrategy } from './export.strategy';
 
+/**
+ * Represents a strategy for exporting notes to CSV format.
+ * This class provides a method to convert an array of notes into a CSV string.
+ */
 export class CsvExportStrategy implements ExportStrategy {
+  /** Serializes notes into CSV with escaped values and headers. */
   export(notes: Note[]): string {
     const headers = [
       'id',

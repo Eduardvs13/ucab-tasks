@@ -24,8 +24,15 @@ export type FindAllOptions = {
   updatedTo?: string;
 };
 
+/**
+ * Repository for handling note data storage.
+ */
 @Injectable()
 export class NotesRepository {
+  /**
+   * Reads all notes from the database file.
+   * @returns A promise that resolves to an array of notes.
+   */
   private async readAllNotes(): Promise<Note[]> {
     const data = await fs.readFile(dbPath, 'utf-8');
     const raw = JSON.parse(data) as RawNote[];
@@ -40,6 +47,11 @@ export class NotesRepository {
     );
   }
 
+  /**
+   * Finds all notes, with optional filtering and sorting.
+   * @param options - Options for searching, sorting, and filtering.
+   * @returns A promise that resolves to an array of note summaries.
+   */
   async findAll(options?: FindAllOptions): Promise<NoteSummary[]> {
     const notes = await this.readAllNotes();
 
@@ -116,16 +128,31 @@ export class NotesRepository {
     }));
   }
 
+  /**
+   * Retrieves all notes including their content.
+   * @returns A promise that resolves to an array of full note objects.
+   */
   async findAllWithContent(): Promise<Note[]> {
     return this.readAllNotes();
   }
 
+  /**
+   * Finds a single note by its ID.
+   * @param id - The ID of the note to find.
+   * @returns A promise that resolves to the note or null if not found.
+   */
   async findOne(id: string): Promise<Note | null> {
     const notes = await this.readAllNotes();
     const note = notes.find((n) => n.id === id);
     return note || null;
   }
 
+  /**
+   * Creates a new note.
+   * @param title - The title of the new note.
+   * @param content - The content of the new note.
+   * @returns A promise that resolves to the newly created note.
+   */
   async create(title: string, content: string): Promise<Note> {
     const notes = await this.readAllNotes();
     const now = new Date();
@@ -141,6 +168,13 @@ export class NotesRepository {
     return newNote;
   }
 
+  /**
+   * Updates an existing note.
+   * @param id - The ID of the note to update.
+   * @param title - The new title for the note.
+   * @param content - The new content for the note.
+   * @returns A promise that resolves to the updated note or null if not found.
+   */
   async update(
     id: string,
     title: string,
@@ -167,6 +201,11 @@ export class NotesRepository {
     return updatedNote;
   }
 
+  /**
+   * Removes a single note by its ID.
+   * @param id - The ID of the note to remove.
+   * @returns A promise that resolves to the removed note or null if not found.
+   */
   async remove(id: string): Promise<Note | null> {
     const notes = await this.readAllNotes();
     const noteIndex = notes.findIndex((n) => n.id === id);
@@ -178,6 +217,11 @@ export class NotesRepository {
     return removedNote;
   }
 
+  /**
+   * Removes multiple notes by their IDs.
+   * @param ids - An array of note IDs to remove.
+   * @returns A promise that resolves to an array of the removed notes.
+   */
   async removeMany(ids: string[]): Promise<Note[]> {
     const notes = await this.readAllNotes();
     const idSet = new Set(ids);
