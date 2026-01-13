@@ -1,11 +1,11 @@
 import { IsString, IsNotEmpty, MinLength } from 'class-validator';
 
 export class CreateNoteDto {
-  @IsString({ message: 'El título debe ser un texto.' })
-  @IsNotEmpty({ message: 'El título no puede estar vacío.' })
-  @MinLength(3, { message: 'El título debe tener al menos 3 caracteres.' })
+  @IsString({ message: 'Title must be a string.' })
+  @IsNotEmpty({ message: 'Title cannot be empty.' })
+  @MinLength(3, { message: 'Title must have at least 3 characters.' })
   title: string;
 
-  @IsString({ message: 'El content debe ser un texto.' })
+  @IsString({ message: 'Content must be a string.' })
   content: string;
 }
