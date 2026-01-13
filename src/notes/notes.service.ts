@@ -1,13 +1,22 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { Note, NoteSummary, ApiNote, ApiNoteSummary } from './entities/note.entity';
-import { NotesRepository } from './notes.repository';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
+import {
+  Note,
+  NoteSummary,
+  ApiNote,
+  ApiNoteSummary,
+} from './entities/note.entity';
+import { NotesRepository, FindAllOptions } from './notes.repository';
 import { ExportStrategy } from './strategies/export.strategy';
 import { CreateNoteDto } from './dto/create-note.dto';
 import { UpdateNoteDto } from './dto/update-note.dto';
 
 @Injectable()
 export class NotesService {
-  constructor(private readonly notesRepository: NotesRepository) { }
+  constructor(private readonly notesRepository: NotesRepository) {}
 
   private toApiNote(n: Note): ApiNote {
     return {
@@ -19,7 +28,7 @@ export class NotesService {
     };
   }
 
-  private toApiSummary(n: Note): ApiNoteSummary {
+  private toApiSummary(n: NoteSummary): ApiNoteSummary {
     return {
       id: n.id,
       title: n.title,
@@ -42,14 +51,14 @@ export class NotesService {
       options?.sort === 'title'
         ? 'title'
         : options?.sort === 'createdAt'
-        ? 'creationDate'
-        : options?.sort === 'updatedAt'
-        ? 'modificationDate'
-        : undefined;
+          ? 'creationDate'
+          : options?.sort === 'updatedAt'
+            ? 'modificationDate'
+            : undefined;
 
-    const internalOptions = {
+    const internalOptions: FindAllOptions = {
       search: options?.search,
-      sort: internalSort as any,
+      sort: internalSort,
       order: options?.order,
       createdFrom: options?.createdFrom,
       createdTo: options?.createdTo,
@@ -58,7 +67,7 @@ export class NotesService {
     };
 
     const summaries = await this.notesRepository.findAll(internalOptions);
-    return (summaries as NoteSummary[]).map((s) => this.toApiSummary(s as Note));
+    return summaries.map((s) => this.toApiSummary(s));
   }
 
   async getNotesByDate(
@@ -80,8 +89,8 @@ export class NotesService {
       const targetIso = new Date(date).toISOString();
 
       const matched = notes.filter((n) => {
-        const created = new Date((n as any).creationDate).toISOString();
-        const modified = new Date((n as any).modificationDate).toISOString();
+        const created = new Date(n.creationDate).toISOString();
+        const modified = new Date(n.modificationDate).toISOString();
         const lastChange = modified !== created ? modified : created;
         if (field === 'created') {
           // match against creation date if explicitly requested
@@ -91,24 +100,38 @@ export class NotesService {
         return lastChange === targetIso;
       });
 
-      return matched.map((n) => this.toApiSummary(n as Note));
+      return matched.map((n) => this.toApiSummary(n));
     }
 
     // Otherwise treat as a whole-day query (UTC day range)
-    const start = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, 0));
+    const start = new Date(
+      Date.UTC(
+        date.getUTCFullYear(),
+        date.getUTCMonth(),
+        date.getUTCDate(),
+        0,
+        0,
+        0,
+        0,
+      ),
+    );
     const end = new Date(start.getTime() + 24 * 60 * 60 * 1000 - 1);
 
-    const options: any = { order };
-    if (field === 'created') {
-      options.createdFrom = start.toISOString();
-      options.createdTo = end.toISOString();
-    } else {
-      options.updatedFrom = start.toISOString();
-      options.updatedTo = end.toISOString();
-    }
+    const options: FindAllOptions =
+      field === 'created'
+        ? {
+            order,
+            createdFrom: start.toISOString(),
+            createdTo: end.toISOString(),
+          }
+        : {
+            order,
+            updatedFrom: start.toISOString(),
+            updatedTo: end.toISOString(),
+          };
 
     const summaries = await this.notesRepository.findAll(options);
-    return (summaries as NoteSummary[]).map((s) => this.toApiSummary(s as Note));
+    return summaries.map((s) => this.toApiSummary(s as Note));
   }
 
   async getNoteById(id: string): Promise<ApiNote> {
@@ -121,7 +144,10 @@ export class NotesService {
 
   async createNote(createNoteDto: CreateNoteDto): Promise<ApiNote> {
     // DTO validation already applied by ValidationPipe
-    const created = await this.notesRepository.create(createNoteDto.title, createNoteDto.content);
+    const created = await this.notesRepository.create(
+      createNoteDto.title,
+      createNoteDto.content,
+    );
     return this.toApiNote(created);
   }
 
@@ -131,7 +157,7 @@ export class NotesService {
       throw new NotFoundException(`Note with ID "${id}" not found.`);
     }
 
-    const newTitle = updateNoteDto.title ?? existing.title
+    const newTitle = updateNoteDto.title ?? existing.title;
     const newContent = updateNoteDto.content ?? existing.content;
 
     const updated = await this.notesRepository.update(id, newTitle, newContent);
@@ -141,26 +167,34 @@ export class NotesService {
     return this.toApiNote(updated);
   }
 
-  async deleteNote(id: string): Promise<ApiNote | ApiNote[]> {
-    const ids = id.split(',').map((v) => v.trim()).filter(Boolean);
+  async deleteNote(id: string): Promise<ApiNote[]> {
+    const ids = id
+      .split(',')
+      .map((v) => v.trim())
+      .filter(Boolean);
     if (ids.length === 0) {
       throw new BadRequestException('At least one note id is required.');
     }
 
     const uniqueIds = Array.from(new Set(ids));
 
+    const allNotes = await this.notesRepository.findAllWithContent();
+    const missing = uniqueIds.filter(
+      (uuid) => !allNotes.some((n) => n.id === uuid),
+    );
+    if (missing.length > 0) {
+      throw new NotFoundException(`Notes not found: ${missing.join(', ')}`);
+    }
+
+    // If only one id, use remove to reuse existing logic; otherwise removeMany
     if (uniqueIds.length === 1) {
       const note = await this.notesRepository.remove(uniqueIds[0]);
       if (!note) {
-        throw new NotFoundException(`Note with ID "${uniqueIds[0]}" not found.`);
+        throw new NotFoundException(
+          `Note with ID "${uniqueIds[0]}" not found.`,
+        );
       }
-      return this.toApiNote(note);
-    }
-
-    const allNotes = await this.notesRepository.findAllWithContent();
-    const missing = uniqueIds.filter((uuid) => !allNotes.some((n) => n.id === uuid));
-    if (missing.length > 0) {
-      throw new NotFoundException(`Notes not found: ${missing.join(', ')}`);
+      return [this.toApiNote(note)];
     }
 
     const removed = await this.notesRepository.removeMany(uniqueIds);

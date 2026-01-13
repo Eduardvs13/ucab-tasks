@@ -15,10 +15,15 @@ import { UpdateNoteDto } from './dto/update-note.dto';
 import { JsonExportStrategy } from './strategies/json-export.strategy';
 import { CsvExportStrategy } from './strategies/csv-export.strategy';
 import { ListNotesQueryDto } from './dto/list-notes.dto';
+import { Res } from '@nestjs/common';
+
+type HeaderSetter = {
+  setHeader: (name: string, value: string) => void;
+};
 
 @Controller('notes')
 export class NotesController {
-  constructor(private readonly notesService: NotesService) { }
+  constructor(private readonly notesService: NotesService) {}
 
   @Get()
   getAll(@Query() query: ListNotesQueryDto) {
@@ -26,13 +31,20 @@ export class NotesController {
   }
 
   @Get('export')
-  async exportNotes(@Query('format') format: string) {
+  async exportNotes(
+    @Query('format') format: string,
+    @Res({ passthrough: true }) res: HeaderSetter,
+  ) {
     // Por defecto, la estrategia será JSON
     let strategy = new JsonExportStrategy();
+    let contentType = 'application/json';
 
     if (format?.toLowerCase() === 'csv') {
       strategy = new CsvExportStrategy();
+      contentType = 'text/csv; charset=utf-8';
     }
+
+    res.setHeader('Content-Type', contentType);
 
     return this.notesService.exportNotes(strategy);
   }
@@ -43,7 +55,11 @@ export class NotesController {
     @Query('field') field?: 'created' | 'modified',
     @Query('order') order?: 'asc' | 'desc',
   ) {
-    return this.notesService.getNotesByDate(date, field ?? 'created', order ?? 'asc');
+    return this.notesService.getNotesByDate(
+      date,
+      field ?? 'created',
+      order ?? 'asc',
+    );
   }
 
   @Get(':id')

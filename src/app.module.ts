@@ -4,6 +4,6 @@ import { NotesModule } from './notes/notes.module';
 @Module({
   imports: [NotesModule],
   controllers: [],
-  providers: [], 
+  providers: [],
 })
 export class AppModule {}
