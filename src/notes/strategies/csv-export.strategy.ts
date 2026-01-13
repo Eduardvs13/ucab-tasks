@@ -3,22 +3,53 @@ import { ExportStrategy } from './export.strategy';
 
 export class CsvExportStrategy implements ExportStrategy {
   export(notes: Note[]): string {
+    const headers = [
+      'id',
+      'title',
+      'content',
+      'creationDate',
+      'modificationDate',
+    ];
+
+    const formatValue = (value: unknown): string => {
+      if (value === null || value === undefined) {
+        return '';
+      }
+      let stringValue: string;
+      if (value instanceof Date) {
+        stringValue = value.toISOString();
+      } else if (typeof value === 'string') {
+        stringValue = value;
+      } else if (
+        typeof value === 'number' ||
+        typeof value === 'boolean' ||
+        typeof value === 'bigint'
+      ) {
+        stringValue = String(value);
+      } else if (typeof value === 'symbol') {
+        stringValue = value.toString();
+      } else {
+        stringValue = JSON.stringify(value);
+      }
+      const escapedValue = stringValue.replace(/"/g, '""');
+      return /[",\n\r]/.test(stringValue) ? `"${escapedValue}"` : escapedValue;
+    };
+
     if (notes.length === 0) {
-      return 'id,titlecontent,creationDate,modificationDate';
+      return headers.join(',');
     }
 
-    const headers = Object.keys(notes[0]).join(',');
-    const rows = notes.map(note => {
-      return Object.values(note)
-        .map(value => {
-          const stringValue = String(value);
-          // Escapa las comas y las comillas dobles dentro de los valores
-          const escapedValue = stringValue.replace(/"/g, '""');
-          return stringValue.includes(',') || stringValue.includes('"') ? `"${escapedValue}"` : stringValue;
-        })
-        .join(',');
+    const rows = notes.map((note) => {
+      const values = [
+        note.id,
+        note.title,
+        note.content,
+        note.creationDate,
+        note.modificationDate,
+      ];
+      return values.map(formatValue).join(',');
     });
 
-    return [headers, ...rows].join('\n');
+    return [headers.join(','), ...rows].join('\n');
   }
 }
