@@ -2,7 +2,9 @@ import { IsOptional, IsString, IsIn, IsISO8601 } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class ListNotesQueryDto {
-  @ApiPropertyOptional({ description: 'Search query to filter notes by title.' })
+  @ApiPropertyOptional({
+    description: 'Search query to filter notes by title.',
+  })
   @IsOptional()
   @IsString({ message: 'search must be a string.' })
   search?: string;

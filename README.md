@@ -29,16 +29,12 @@ API REST para gestionar notas con NestJS. Incluye CRUD completo, validaciones co
    - URL base: http://localhost:3000
    - Swagger UI: http://localhost:3000/api
    - Variable opcional: `PORT` para cambiar el puerto.
-4. Ejecutar en producción local
-   ```bash
-   npm run build
-   npm run start:prod
-   ```
-5. Ejecutar pruebas
+
+4. Ejecutar pruebas
    ```bash
    npm test        # unitarias
    npm run test:e2e # end-to-end
-   npm run lint     # lint con ESLint
+   npm run test -- [nombre-completo-del-test].[extensión] # ejecuta un test específico
    ```
 
 ## Endpoints principales
@@ -65,11 +61,9 @@ API REST para gestionar notas con NestJS. Incluye CRUD completo, validaciones co
 - `npm run start:dev`: servidor en modo desarrollo con watch.
 - `npm run start:prod`: ejecuta el build compilado.
 - `npm run test` | `npm run test:e2e`: pruebas unitarias y e2e.
-- `npm run lint`: revisa estilo y corrige lo posible.
-- `npm run format`: formatea código fuente y pruebas.
 
 ## Notas de operación
 
 - El archivo de datos debe existir antes de escribir; se incluye un ejemplo en `database/notes.json`.
-- Asegúrate de ejecutar el proceso con permisos de escritura si despliegas en contenedores o servicios administrados.
+- Asegúrate de ejecutar el proceso con permisos de escritura.
 - Para extender formatos de exportación, implementa `ExportStrategy` y regístralo en el controlador o servicio.

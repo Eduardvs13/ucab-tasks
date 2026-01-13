@@ -14,32 +14,11 @@
     "modificationDate": "2026-01-06T09:00:00.000Z"
   },
   {
-    "id": "11111111-2222-3333-4444-555555555555",
-    "title": "Checklist QA",
-    "content": "Pruebas e2e, validación DTOs, export JSON/CSV, borrar por lote.",
-    "creationDate": "2026-01-04T12:45:00.000Z",
-    "modificationDate": "2026-01-11T12:00:00.000Z"
-  },
-  {
     "id": "abcd1234-5678-4abc-8def-0123456789ab",
     "title": "Plan de mejoras",
     "content": "Implementar paginación y búsqueda por título.",
     "creationDate": "2026-01-03T07:30:00.000Z",
     "modificationDate": "2026-01-09T21:15:00.000Z"
-  },
-  {
-    "id": "c0ffee00-babe-4dad-8bee-deadbeef0001",
-    "title": "Doc técnica",
-    "content": "Estructura de capas: controller, service, repository y strategies.",
-    "creationDate": "2026-01-02T14:10:00.000Z",
-    "modificationDate": "2026-01-02T16:40:00.000Z"
-  },
-  {
-    "id": "feedface-1234-4abc-9def-0123feedc0de",
-    "title": "Análisis de rendimiento",
-    "content": "Indexación por título y fechas; evitar parse redundante de JSON.",
-    "creationDate": "2026-01-01T10:00:00.000Z",
-    "modificationDate": "2026-01-11T10:00:00.000Z"
   },
   {
     "id": "7890abcd-1234-5678-90ab-cdef12345678",
@@ -68,5 +47,12 @@
     "content": "Contenido",
     "creationDate": "2026-01-10T10:00:00.000Z",
     "modificationDate": "2026-01-10T10:00:00.000Z"
+  },
+  {
+    "id": "b25a2a60-56b7-40f6-a58c-8e003f3f1af1",
+    "title": "Notica nueva",
+    "content": "contenidododod",
+    "creationDate": "2026-01-13T22:37:20.097Z",
+    "modificationDate": "2026-01-13T22:37:20.097Z"
   }
 ]

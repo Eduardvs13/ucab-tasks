@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
+/** Bootstraps the NestJS application with Swagger docs and global validation. */
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 

@@ -16,6 +16,10 @@ import {
   ApiResponse,
   ApiParam,
   ApiQuery,
+  ApiBadRequestResponse,
+  ApiConsumes,
+  ApiProduces,
+  ApiBody,
 } from '@nestjs/swagger';
 import { NotesService } from './notes.service';
 import { CreateNoteDto } from './dto/create-note.dto';
@@ -46,6 +50,7 @@ export class NotesController {
     description: 'A list of notes.',
     type: [ApiNoteSummary],
   })
+  @ApiBadRequestResponse({ description: 'Validation error in query params.' })
   getAll(@Query() query: ListNotesQueryDto) {
     return this.notesService.getAllNotes(query);
   }
@@ -59,7 +64,23 @@ export class NotesController {
   @Get('export')
   @ApiOperation({ summary: 'Export notes' })
   @ApiQuery({ name: 'format', enum: ['json', 'csv'] })
-  @ApiResponse({ status: 200, description: 'The exported notes.' })
+  @ApiProduces('application/json', 'text/csv')
+  @ApiResponse({
+    status: 200,
+    description: 'The exported notes as JSON or CSV.',
+    schema: {
+      oneOf: [
+        {
+          type: 'string',
+          example: '[{"id":"...","title":"Note","content":"...","createdAt":"2024-01-01T00:00:00.000Z","updatedAt":"2024-01-02T00:00:00.000Z"}]',
+        },
+        {
+          type: 'string',
+          example: 'id,title,content,createdAt,updatedAt\n...'
+        },
+      ],
+    },
+  })
   async exportNotes(
     @Query('format') format: string,
     @Res({ passthrough: true }) res: HeaderSetter,
@@ -86,8 +107,15 @@ export class NotesController {
   @Get(':id')
   @ApiOperation({ summary: 'Get a note by ID' })
   @ApiParam({ name: 'id', description: 'The ID of the note' })
-  @ApiResponse({ status: 200, description: 'The requested note.', type: ApiNote })
+  @ApiResponse({
+    status: 200,
+    description: 'The requested note.',
+    type: ApiNote,
+  })
   @ApiResponse({ status: 404, description: 'Note not found.' })
+  @ApiBadRequestResponse({
+    description: 'Invalid UUID format.',
+  })
   getById(@Param('id', ParseUUIDPipe) id: string) {
     return this.notesService.getNoteById(id);
   }
@@ -99,10 +127,25 @@ export class NotesController {
    */
   @Post()
   @ApiOperation({ summary: 'Create a new note' })
+  @ApiConsumes('application/json')
+  @ApiBody({
+    description: 'Payload to create a note.',
+    schema: {
+      type: 'object',
+      properties: {
+        title: { type: 'string', example: 'My note title' },
+        content: { type: 'string', example: 'Detailed content' },
+      },
+      required: ['title', 'content'],
+    },
+  })
   @ApiResponse({
     status: 201,
     description: 'The note has been successfully created.',
     type: ApiNote,
+  })
+  @ApiBadRequestResponse({
+    description: 'Validation error in request body.',
   })
   create(@Body() createNoteDto: CreateNoteDto) {
     return this.notesService.createNote(createNoteDto);
@@ -117,12 +160,26 @@ export class NotesController {
   @Put(':id')
   @ApiOperation({ summary: 'Update a note' })
   @ApiParam({ name: 'id', description: 'The ID of the note to update' })
+  @ApiConsumes('application/json')
+  @ApiBody({
+    description: 'Payload to update a note.',
+    schema: {
+      type: 'object',
+      properties: {
+        title: { type: 'string', example: 'Updated title' },
+        content: { type: 'string', example: 'Updated content' },
+      },
+    },
+  })
   @ApiResponse({
     status: 200,
     description: 'The note has been successfully updated.',
     type: ApiNote,
   })
   @ApiResponse({ status: 404, description: 'Note not found.' })
+  @ApiBadRequestResponse({
+    description: 'Invalid UUID format or validation error in body.',
+  })
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateNoteDto: UpdateNoteDto,
@@ -140,6 +197,10 @@ export class NotesController {
   @ApiParam({
     name: 'id',
     description: 'A comma-separated list of note IDs to delete',
+    schema: {
+      type: 'string',
+      example: 'uuid-1,uuid-2',
+    },
   })
   @ApiResponse({
     status: 200,
@@ -147,6 +208,9 @@ export class NotesController {
     type: [ApiNote],
   })
   @ApiResponse({ status: 404, description: 'Note(s) not found.' })
+  @ApiBadRequestResponse({
+    description: 'Invalid or missing IDs in path parameter.',
+  })
   delete(@Param('id') id: string) {
     return this.notesService.deleteNote(id);
   }

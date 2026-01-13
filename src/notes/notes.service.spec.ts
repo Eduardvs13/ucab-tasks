@@ -73,7 +73,6 @@ describe('NotesService', () => {
     ]);
   });
 
-
   it('getNoteById returns mapped note or throws when missing', async () => {
     repo.findOne.mockResolvedValue(baseNote);
     const found = await service.getNoteById('n-1');

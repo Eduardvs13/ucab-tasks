@@ -19,7 +19,7 @@ import { UpdateNoteDto } from './dto/update-note.dto';
  */
 @Injectable()
 export class NotesService {
-  constructor(private readonly notesRepository: NotesRepository) { }
+  constructor(private readonly notesRepository: NotesRepository) {}
 
   /**
    * Converts an internal Note object to an API-facing Note object.
