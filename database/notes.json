@@ -1,19 +1,5 @@
 [
   {
-    "id": "583e63b0-6394-4922-8b4b-ece6ae186ace",
-    "title": "Nota para pruebas avanzadas",
-    "content": "content inicial.",
-    "creationDate": "2026-01-11T22:39:57.059Z",
-    "modificationDate": "2026-01-11T22:39:57.059Z"
-  },
-  {
-    "id": "9c8b7a6d-5e4f-4321-8a7b-6c5d4e3f2a10",
-    "title": "Notas de reunión con cliente",
-    "content": "Solicitan performance en listados y ocultar contenido en resumen.",
-    "creationDate": "2026-01-07T16:30:00.000Z",
-    "modificationDate": "2026-01-07T18:05:00.000Z"
-  },
-  {
     "id": "a1b2c3d4-e5f6-47a8-9b0c-d1e2f3a4b5c6",
     "title": "Recordatorio de deploy",
     "content": "Preparar release notes y validar rollback plan.",

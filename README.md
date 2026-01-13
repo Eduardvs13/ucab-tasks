@@ -1,93 +1,75 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+## Ucab Tasks - API de Notas
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+API REST para gestionar notas con NestJS. Incluye CRUD completo, validaciones con pipes globales, filtrado/ordenación por fechas y exportación en JSON o CSV. La persistencia se realiza en un archivo local, por lo que no necesitas un servidor de base de datos.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Requisitos
 
-# Ucab Tasks - API de Notas
+- Node.js >= 18 (recomendado Node 20 LTS).
+- npm >= 10 (incluido con Node).
+- Git para clonar el repositorio.
+- Permisos de lectura/escritura sobre [database/notes.json](database/notes.json).
+- Opcional: [Nest CLI](https://docs.nestjs.com/cli/overview) si quieres usar comandos `nest` directamente.
 
-Este proyecto es una API REST para una aplicación de toma de notas, construida con [NestJS](https://nestjs.com/). El objetivo es crear un servidor modular, escalable y fácil de mantener, aplicando patrones de diseño de software.
+## Puesta en marcha local
 
-## Características Implementadas
+1. Clonar el repositorio
+   ```bash
+   git clone <url-del-repositorio>
+   cd ucab-tasks
+   ```
+2. Instalar dependencias
+   ```bash
+   npm install
+   ```
+3. Ejecutar en desarrollo (recarga en caliente)
+   ```bash
+   npm run start:dev
+   ```
 
-- **Gestión de Notas (CRUD):**
-  - Crear una nueva nota.
-  - Obtener una lista de todas las notas.
-  - Obtener una nota específica por su ID.
-  - Actualizar una nota existente.
-  - Eliminar una nota.
-- **Persistencia de Datos:** Los datos de las notas se guardan en un archivo `database/notes.json`.
-- **Exportación de Datos:** Las notas se pueden exportar en diferentes formatos (actualmente JSON y CSV).
+   - URL base: http://localhost:3000
+   - Swagger UI: http://localhost:3000/api
+   - Variable opcional: `PORT` para cambiar el puerto.
+4. Ejecutar en producción local
+   ```bash
+   npm run build
+   npm run start:prod
+   ```
+5. Ejecutar pruebas
+   ```bash
+   npm test        # unitarias
+   npm run test:e2e # end-to-end
+   npm run lint     # lint con ESLint
+   ```
 
-## Arquitectura y Patrones de Diseño
+## Endpoints principales
 
-La aplicación sigue una arquitectura de 3 capas para asegurar la separación de responsabilidades y la modularidad.
+| Método | Ruta          | Descripción                                                                                                                                                                        |
+| :----- | :------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | /notes        | Lista notas con filtros opcionales: `search`, `sort` (title, createdAt, updatedAt), `order` (asc, desc), `createdFrom`, `createdTo`, `updatedFrom`, `updatedTo` (fechas ISO 8601). |
+| GET    | /notes/export | Exporta notas. Parámetro `format=csv` para CSV; por defecto JSON.                                                                                                                  |
+| GET    | /notes/:id    | Obtiene una nota por UUID.                                                                                                                                                         |
+| POST   | /notes        | Crea una nota. Campos: `title` (min 3), `content`.                                                                                                                                 |
+| PUT    | /notes/:id    | Actualiza título y/o contenido.                                                                                                                                                    |
+| DELETE | /notes/:id    | Elimina una o varias notas (IDs separados por coma).                                                                                                                               |
 
-1.  **Capa de Presentación (Controller):**
-    - `NotesController`: Expone los endpoints de la API REST. Es el punto de entrada para las solicitudes del cliente.
+## Datos y arquitectura
 
-2.  **Capa de Lógica de Negocio (Service):**
-    - `NotesService`: Contiene la lógica de negocio. Orquesta las operaciones y aplica las reglas (ej. validaciones).
+- Persistencia en [database/notes.json](database/notes.json); no requiere motor de base de datos.
+- Validaciones automáticas con `ValidationPipe` global (propiedades extra se rechazan).
+- Patrón Repository en [src/notes/notes.repository.ts](src/notes/notes.repository.ts) para aislar acceso a datos.
+- Patrón Strategy para exportación en [src/notes/strategies](src/notes/strategies) (JSON y CSV).
+- Documentación auto-generada con Swagger en `/api` configurada en [src/main.ts](src/main.ts).
 
-3.  **Capa de Acceso a Datos (Repository):**
-    - `NotesRepository`: Encapsula la lógica para interactuar con la fuente de datos (el archivo JSON).
+## Scripts npm útiles
 
-### Patrones de Diseño Aplicados
+- `npm run start:dev`: servidor en modo desarrollo con watch.
+- `npm run start:prod`: ejecuta el build compilado.
+- `npm run test` | `npm run test:e2e`: pruebas unitarias y e2e.
+- `npm run lint`: revisa estilo y corrige lo posible.
+- `npm run format`: formatea código fuente y pruebas.
 
-- **Repository Pattern:** El `NotesService` depende de la abstracción del `NotesRepository`, no de una implementación concreta. Esto desacopla la lógica de negocio de la persistencia de datos, permitiendo cambiar la base de datos en el futuro (ej. de JSON a SQL) sin afectar el resto de la aplicación.
+## Notas de operación
 
-- **Strategy Pattern:** Se utiliza para la funcionalidad de exportación.
-  - Una interfaz `ExportStrategy` define un contrato para diferentes algoritmos de exportación.
-  - Clases concretas como `JsonExportStrategy` y `CsvExportStrategy` implementan la lógica para cada formato.
-  - El `NotesService` utiliza la estrategia seleccionada para exportar los datos, permitiendo añadir nuevos formatos de manera sencilla y sin modificar el servicio.
-
-- **Inyección de Dependencias (Dependency Injection):** Utilizado en todo el proyecto y gestionado por el contenedor de Inversión de Control (IoC) de NestJS. Las clases reciben sus dependencias (ej. el servicio recibe el repositorio) en lugar de crearlas, lo que aumenta la modularidad y facilita las pruebas.
-
-## API Endpoints
-
-| Método | Ruta                  | Descripción                               |
-| :----- | :-------------------- | :---------------------------------------- |
-| `GET`  | `/notes`              | Obtiene todas las notas.                  |
-| `GET`  | `/notes/:id`          | Obtiene una nota por su ID.               |
-| `POST` | `/notes`              | Crea una nueva nota.                      |
-| `PUT`  | `/notes/:id`          | Actualiza una nota existente.             |
-| `DELETE`| `/notes/:id`          | Elimina una nota.                         |
-| `GET`  | `/notes/export`       | Exporta todas las notas en formato JSON.  |
-| `GET`  | `/notes/export?format=csv` | Exporta todas las notas en formato CSV.   |
-
-## Cómo Empezar
-
-1.  **Clonar el repositorio:**
-    ```bash
-    git clone <url-del-repositorio>
-    cd ucab-tasks
-    ```
-
-2.  **Instalar dependencias:**
-    ```bash
-    npm install
-    ```
-
-3.  **Ejecutar la aplicación en modo de desarrollo:**
-    ```bash
-    npm run start:dev
-    ```
-
-La API estará disponible en `http://localhost:3000`.
+- El archivo de datos debe existir antes de escribir; se incluye un ejemplo en `database/notes.json`.
+- Asegúrate de ejecutar el proceso con permisos de escritura si despliegas en contenedores o servicios administrados.
+- Para extender formatos de exportación, implementa `ExportStrategy` y regístralo en el controlador o servicio.

@@ -14,10 +14,18 @@ import { ExportStrategy } from './strategies/export.strategy';
 import { CreateNoteDto } from './dto/create-note.dto';
 import { UpdateNoteDto } from './dto/update-note.dto';
 
+/**
+ * Service for handling note-related operations.
+ */
 @Injectable()
 export class NotesService {
-  constructor(private readonly notesRepository: NotesRepository) {}
+  constructor(private readonly notesRepository: NotesRepository) { }
 
+  /**
+   * Converts an internal Note object to an API-facing Note object.
+   * @param n - The internal Note object.
+   * @returns The API-facing Note object.
+   */
   private toApiNote(n: Note): ApiNote {
     return {
       id: n.id,
@@ -28,6 +36,11 @@ export class NotesService {
     };
   }
 
+  /**
+   * Converts an internal NoteSummary object to an API-facing NoteSummary object.
+   * @param n - The internal NoteSummary object.
+   * @returns The API-facing NoteSummary object.
+   */
   private toApiSummary(n: NoteSummary): ApiNoteSummary {
     return {
       id: n.id,
@@ -37,6 +50,11 @@ export class NotesService {
     };
   }
 
+  /**
+   * Retrieves all notes with optional filtering and sorting.
+   * @param options - Options for searching, sorting, and filtering.
+   * @returns A promise that resolves to an array of note summaries.
+   */
   async getAllNotes(options?: {
     search?: string;
     sort?: 'title' | 'createdAt' | 'updatedAt';
@@ -70,7 +88,11 @@ export class NotesService {
     return summaries.map((s) => this.toApiSummary(s));
   }
 
-
+  /**
+   * Retrieves a single note by its ID.
+   * @param id - The ID of the note to retrieve.
+   * @returns A promise that resolves to the note.
+   */
   async getNoteById(id: string): Promise<ApiNote> {
     const note = await this.notesRepository.findOne(id);
     if (!note) {
@@ -79,6 +101,11 @@ export class NotesService {
     return this.toApiNote(note);
   }
 
+  /**
+   * Creates a new note.
+   * @param createNoteDto - The data for creating the note.
+   * @returns A promise that resolves to the created note.
+   */
   async createNote(createNoteDto: CreateNoteDto): Promise<ApiNote> {
     // DTO validation already applied by ValidationPipe
     const created = await this.notesRepository.create(
@@ -88,6 +115,12 @@ export class NotesService {
     return this.toApiNote(created);
   }
 
+  /**
+   * Updates an existing note.
+   * @param id - The ID of the note to update.
+   * @param updateNoteDto - The data for updating the note.
+   * @returns A promise that resolves to the updated note.
+   */
   async updateNote(id: string, updateNoteDto: UpdateNoteDto): Promise<ApiNote> {
     const existing = await this.notesRepository.findOne(id);
     if (!existing) {
@@ -104,6 +137,11 @@ export class NotesService {
     return this.toApiNote(updated);
   }
 
+  /**
+   * Deletes one or more notes by their IDs.
+   * @param id - A comma-separated string of note IDs.
+   * @returns A promise that resolves to an array of the deleted notes.
+   */
   async deleteNote(id: string): Promise<ApiNote[]> {
     const ids = id
       .split(',')
@@ -138,6 +176,11 @@ export class NotesService {
     return removed.map((n) => this.toApiNote(n));
   }
 
+  /**
+   * Exports all notes using a given strategy.
+   * @param strategy - The export strategy to use.
+   * @returns A promise that resolves to the exported data as a string.
+   */
   async exportNotes(strategy: ExportStrategy): Promise<string> {
     const notes = await this.notesRepository.findAllWithContent();
     return strategy.export(notes);
