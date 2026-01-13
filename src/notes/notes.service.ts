@@ -70,69 +70,6 @@ export class NotesService {
     return summaries.map((s) => this.toApiSummary(s));
   }
 
-  async getNotesByDate(
-    dateStr: string,
-    field: 'created' | 'modified' = 'created',
-    order: 'asc' | 'desc' = 'asc',
-  ): Promise<ApiNoteSummary[]> {
-    const date = new Date(dateStr);
-    if (isNaN(date.getTime())) {
-      throw new BadRequestException('date must be a valid date string');
-    }
-
-    // If user provided a full timestamp (contains 'T' or time component),
-    // perform exact-match against the "last change" of each note:
-    // lastChange = modificationDate !== creationDate ? modificationDate : creationDate
-    const isFullTimestamp = /T/.test(dateStr) || /:\d{2}/.test(dateStr);
-    if (isFullTimestamp) {
-      const notes = await this.notesRepository.findAllWithContent();
-      const targetIso = new Date(date).toISOString();
-
-      const matched = notes.filter((n) => {
-        const created = new Date(n.creationDate).toISOString();
-        const modified = new Date(n.modificationDate).toISOString();
-        const lastChange = modified !== created ? modified : created;
-        if (field === 'created') {
-          // match against creation date if explicitly requested
-          return created === targetIso;
-        }
-        // field === 'modified' -> match against lastChange
-        return lastChange === targetIso;
-      });
-
-      return matched.map((n) => this.toApiSummary(n));
-    }
-
-    // Otherwise treat as a whole-day query (UTC day range)
-    const start = new Date(
-      Date.UTC(
-        date.getUTCFullYear(),
-        date.getUTCMonth(),
-        date.getUTCDate(),
-        0,
-        0,
-        0,
-        0,
-      ),
-    );
-    const end = new Date(start.getTime() + 24 * 60 * 60 * 1000 - 1);
-
-    const options: FindAllOptions =
-      field === 'created'
-        ? {
-            order,
-            createdFrom: start.toISOString(),
-            createdTo: end.toISOString(),
-          }
-        : {
-            order,
-            updatedFrom: start.toISOString(),
-            updatedTo: end.toISOString(),
-          };
-
-    const summaries = await this.notesRepository.findAll(options);
-    return summaries.map((s) => this.toApiSummary(s as Note));
-  }
 
   async getNoteById(id: string): Promise<ApiNote> {
     const note = await this.notesRepository.findOne(id);

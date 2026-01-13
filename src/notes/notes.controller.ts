@@ -1,13 +1,14 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Param,
-  Put,
+  Controller,
   Delete,
-  Query,
+  Get,
+  Param,
   ParseUUIDPipe,
+  Post,
+  Put,
+  Query,
+  Res,
 } from '@nestjs/common';
 import { NotesService } from './notes.service';
 import { CreateNoteDto } from './dto/create-note.dto';
@@ -15,7 +16,6 @@ import { UpdateNoteDto } from './dto/update-note.dto';
 import { JsonExportStrategy } from './strategies/json-export.strategy';
 import { CsvExportStrategy } from './strategies/csv-export.strategy';
 import { ListNotesQueryDto } from './dto/list-notes.dto';
-import { Res } from '@nestjs/common';
 
 type HeaderSetter = {
   setHeader: (name: string, value: string) => void;
@@ -35,7 +35,7 @@ export class NotesController {
     @Query('format') format: string,
     @Res({ passthrough: true }) res: HeaderSetter,
   ) {
-    // Por defecto, la estrategia será JSON
+    // Default strategy is JSON
     let strategy = new JsonExportStrategy();
     let contentType = 'application/json';
 
@@ -47,19 +47,6 @@ export class NotesController {
     res.setHeader('Content-Type', contentType);
 
     return this.notesService.exportNotes(strategy);
-  }
-
-  @Get('date')
-  async getByDate(
-    @Query('date') date: string,
-    @Query('field') field?: 'created' | 'modified',
-    @Query('order') order?: 'asc' | 'desc',
-  ) {
-    return this.notesService.getNotesByDate(
-      date,
-      field ?? 'created',
-      order ?? 'asc',
-    );
   }
 
   @Get(':id')
