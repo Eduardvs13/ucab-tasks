@@ -1,0 +1,14 @@
+{
+  "entryPoints": ["src"],
+  "entryPointStrategy": "expand",
+  "out": "docs",
+  "includeVersion": true,
+  "tsconfig": "tsconfig.json",
+  "exclude": [
+    "**/*.spec.ts",
+    "test/**",
+    "**/node_modules/**"
+  ],
+  "name": "API de Notas",
+  "categorizeByGroup": false
+}

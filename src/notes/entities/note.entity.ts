@@ -1,55 +1,55 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class Note {
-  @ApiProperty({ description: 'The unique identifier of the note.' })
+  @ApiProperty({ description: 'Identificador único de la nota.' })
   id: string;
 
-  @ApiProperty({ description: 'The title of the note.' })
+  @ApiProperty({ description: 'Título de la nota.' })
   title: string;
 
-  @ApiProperty({ description: 'The content of the note.' })
+  @ApiProperty({ description: 'Contenido de la nota.' })
   content: string;
 
-  @ApiProperty({ description: 'The creation date of the note.' })
+  @ApiProperty({ description: 'Fecha de creación de la nota.' })
   creationDate: Date;
 
-  @ApiProperty({ description: 'The last modification date of the note.' })
+  @ApiProperty({ description: 'Fecha de última modificación de la nota.' })
   modificationDate: Date;
 }
 
 // API-facing types with English field names
 export class ApiNote {
-  @ApiProperty({ description: 'The unique identifier of the note.' })
+  @ApiProperty({ description: 'Identificador único de la nota.' })
   id: string;
 
-  @ApiProperty({ description: 'The title of the note.' })
+  @ApiProperty({ description: 'Título de la nota.' })
   title: string;
 
-  @ApiProperty({ description: 'The content of the note.' })
+  @ApiProperty({ description: 'Contenido de la nota.' })
   content: string;
 
   @ApiProperty({
-    description: 'The creation date of the note in ISO format.',
+    description: 'Fecha de creación de la nota en formato ISO.',
   })
-  createdAt: string; // ISO string
+  createdAt: string; // cadena ISO
 
   @ApiProperty({
-    description: 'The last modification date of the note in ISO format.',
+    description: 'Fecha de última modificación de la nota en formato ISO.',
   })
-  updatedAt: string; // ISO string
+  updatedAt: string; // cadena ISO
 }
 
 export class ApiNoteSummary implements Omit<ApiNote, 'content'> {
-  @ApiProperty({ description: 'The unique identifier of the note.' })
+  @ApiProperty({ description: 'Identificador único de la nota.' })
   id: string;
-  @ApiProperty({ description: 'The title of the note.' })
+  @ApiProperty({ description: 'Título de la nota.' })
   title: string;
   @ApiProperty({
-    description: 'The creation date of the note in ISO format.',
+    description: 'Fecha de creación de la nota en formato ISO.',
   })
   createdAt: string;
   @ApiProperty({
-    description: 'The last modification date of the note in ISO format.',
+    description: 'Fecha de última modificación de la nota en formato ISO.',
   })
   updatedAt: string;
 }

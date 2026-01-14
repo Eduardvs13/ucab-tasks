@@ -3,27 +3,29 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
-/** Bootstraps the NestJS application with Swagger docs and global validation. */
-async function bootstrap() {
+/** Inicializa la aplicación NestJS con documentación Swagger y validación global. */
+export async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   const config = new DocumentBuilder()
-    .setTitle('Notes API')
-    .setDescription('The notes API description')
+    .setTitle('API de Notas')
+    .setDescription('API para gestionar notas: CRUD, filtros y exportación')
     .setVersion('1.0')
-    .addTag('notes')
+    .addTag('notas')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true, // Ignore properties not defined in the DTO.
-      forbidNonWhitelisted: true, // Throw if unexpected properties are sent.
-      transform: true, // Transform payloads into DTO instances.
+      whitelist: true, // Ignora propiedades no definidas en el DTO.
+      forbidNonWhitelisted: true, // Lanza error si se envían propiedades inesperadas.
+      transform: true, // Transforma el payload en instancias de DTO.
     }),
   );
 
   await app.listen(process.env.PORT ?? 3000);
 }
-void bootstrap();
+if (process.env.NODE_ENV !== 'test') {
+  void bootstrap();
+}

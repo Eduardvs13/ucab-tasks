@@ -1,8 +1,8 @@
 import { Note } from '../entities/note.entity';
 
 /**
- * Defines the interface for an export strategy.
- * Any class that implements this interface must provide a method to export notes.
+ * Define la interfaz para una estrategia de exportación.
+ * Cualquier clase que la implemente debe proveer un método para exportar notas.
  */
 export interface ExportStrategy {
   export(notes: Note[]): string;
