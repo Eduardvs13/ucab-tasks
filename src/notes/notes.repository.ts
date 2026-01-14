@@ -1,18 +1,8 @@
-import { promises as fs } from 'fs';
-import * as path from 'path';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { Note, NoteSummary } from './entities/note.entity';
-import { randomUUID } from 'crypto';
-
-const dbPath = path.resolve(__dirname, '..', '..', 'database', 'notes.json');
-
-type RawNote = {
-  id: string;
-  title: string;
-  content: string;
-  creationDate: string;
-  modificationDate: string;
-};
+import { NOTES_STORE } from './tokens';
+import type { NotesStore } from './stores/notes.store';
+import { NoteFactory } from './factories/note.factory';
 
 export type FindAllOptions = {
   search?: string;
@@ -25,35 +15,22 @@ export type FindAllOptions = {
 };
 
 /**
- * Repository for handling note data storage.
+ * Repositorio para gestionar el almacenamiento de datos de notas.
  */
 @Injectable()
 export class NotesRepository {
-  /**
-   * Reads all notes from the database file.
-   * @returns A promise that resolves to an array of notes.
-   */
-  private async readAllNotes(): Promise<Note[]> {
-    const data = await fs.readFile(dbPath, 'utf-8');
-    const raw = JSON.parse(data) as RawNote[];
-    return raw.map(
-      (n): Note => ({
-        id: n.id,
-        title: n.title,
-        content: n.content,
-        creationDate: new Date(n.creationDate),
-        modificationDate: new Date(n.modificationDate),
-      }),
-    );
-  }
+  constructor(
+    @Inject(NOTES_STORE) private readonly store: NotesStore,
+    private readonly noteFactory: NoteFactory,
+  ) { }
 
   /**
-   * Finds all notes, with optional filtering and sorting.
-   * @param options - Options for searching, sorting, and filtering.
-   * @returns A promise that resolves to an array of note summaries.
+   * Busca todas las notas, con filtros y orden opcionales.
+   * @param options - Opciones de búsqueda, orden y filtros.
+   * @returns Promesa que resuelve a un arreglo de resúmenes de notas.
    */
   async findAll(options?: FindAllOptions): Promise<NoteSummary[]> {
-    const notes = await this.readAllNotes();
+    const notes = await this.store.getAll();
 
     let results = notes.slice();
 
@@ -64,7 +41,7 @@ export class NotesRepository {
       );
     }
 
-    // Date range filtering (creation)
+    // Filtrado por rango de fechas (creación)
     if (options?.createdFrom) {
       const from = new Date(options.createdFrom).getTime();
       results = results.filter((n) => n.creationDate.getTime() >= from);
@@ -74,7 +51,7 @@ export class NotesRepository {
       results = results.filter((n) => n.creationDate.getTime() <= to);
     }
 
-    // Date range filtering (modification)
+    // Filtrado por rango de fechas (modificación)
     if (options?.updatedFrom) {
       const from = new Date(options.updatedFrom).getTime();
       results = results.filter((n) => n.modificationDate.getTime() >= from);
@@ -84,8 +61,8 @@ export class NotesRepository {
       results = results.filter((n) => n.modificationDate.getTime() <= to);
     }
 
-    // Determine effective sort key: if sort not provided but date filters exist,
-    // default to the corresponding date field so `order` still applies.
+    // Determinar la clave de orden efectiva: si no se provee sort pero existen filtros por fecha,
+    // se usa el campo de fecha correspondiente para que `order` aplique.
     let effectiveSort = options?.sort;
     if (!effectiveSort) {
       if (options?.createdFrom || options?.createdTo) {
@@ -129,58 +106,51 @@ export class NotesRepository {
   }
 
   /**
-   * Retrieves all notes including their content.
-   * @returns A promise that resolves to an array of full note objects.
+   * Recupera todas las notas incluyendo su contenido.
+   * @returns Promesa que resuelve a un arreglo de notas completas.
    */
   async findAllWithContent(): Promise<Note[]> {
-    return this.readAllNotes();
+    return this.store.getAll();
   }
 
   /**
-   * Finds a single note by its ID.
-   * @param id - The ID of the note to find.
-   * @returns A promise that resolves to the note or null if not found.
+   * Busca una nota por su ID.
+   * @param id - ID de la nota.
+   * @returns Promesa que resuelve a la nota o null si no existe.
    */
   async findOne(id: string): Promise<Note | null> {
-    const notes = await this.readAllNotes();
+    const notes = await this.store.getAll();
     const note = notes.find((n) => n.id === id);
     return note || null;
   }
 
   /**
-   * Creates a new note.
-   * @param title - The title of the new note.
-   * @param content - The content of the new note.
-   * @returns A promise that resolves to the newly created note.
+   * Crea una nueva nota.
+   * @param title - Título de la nueva nota.
+   * @param content - Contenido de la nueva nota.
+   * @returns Promesa que resuelve a la nota creada.
    */
   async create(title: string, content: string): Promise<Note> {
-    const notes = await this.readAllNotes();
-    const now = new Date();
-    const newNote: Note = {
-      id: randomUUID(),
-      title,
-      content,
-      creationDate: now,
-      modificationDate: now,
-    };
+    const notes = await this.store.getAll();
+    const newNote = this.noteFactory.create(title, content);
     notes.push(newNote);
-    await fs.writeFile(dbPath, JSON.stringify(notes, null, 2));
+    await this.store.saveAll(notes);
     return newNote;
   }
 
   /**
-   * Updates an existing note.
-   * @param id - The ID of the note to update.
-   * @param title - The new title for the note.
-   * @param content - The new content for the note.
-   * @returns A promise that resolves to the updated note or null if not found.
+   * Actualiza una nota existente.
+   * @param id - ID de la nota a actualizar.
+   * @param title - Nuevo título de la nota.
+   * @param content - Nuevo contenido de la nota.
+   * @returns Promesa que resuelve a la nota actualizada o null si no se encontró.
    */
   async update(
     id: string,
     title: string,
     content: string,
   ): Promise<Note | null> {
-    const notes = await this.readAllNotes();
+    const notes = await this.store.getAll();
     const noteIndex = notes.findIndex((n) => n.id === id);
 
     if (noteIndex === -1) {
@@ -188,42 +158,41 @@ export class NotesRepository {
     }
 
     const originalNote = notes[noteIndex];
-    const updatedNote: Note = {
-      ...originalNote,
-      title: title,
-      content: content,
-      modificationDate: new Date(),
-    };
+    const updatedNote: Note = this.noteFactory.update(
+      originalNote,
+      title,
+      content,
+    );
 
     notes[noteIndex] = updatedNote;
-    await fs.writeFile(dbPath, JSON.stringify(notes, null, 2));
+    await this.store.saveAll(notes);
 
     return updatedNote;
   }
 
   /**
-   * Removes a single note by its ID.
-   * @param id - The ID of the note to remove.
-   * @returns A promise that resolves to the removed note or null if not found.
+   * Elimina una nota por su ID.
+   * @param id - ID de la nota a eliminar.
+   * @returns Promesa que resuelve a la nota eliminada o null si no se encontró.
    */
   async remove(id: string): Promise<Note | null> {
-    const notes = await this.readAllNotes();
+    const notes = await this.store.getAll();
     const noteIndex = notes.findIndex((n) => n.id === id);
     if (noteIndex === -1) {
       return null;
     }
     const [removedNote] = notes.splice(noteIndex, 1);
-    await fs.writeFile(dbPath, JSON.stringify(notes, null, 2));
+    await this.store.saveAll(notes);
     return removedNote;
   }
 
   /**
-   * Removes multiple notes by their IDs.
-   * @param ids - An array of note IDs to remove.
-   * @returns A promise that resolves to an array of the removed notes.
+   * Elimina múltiples notas por sus IDs.
+   * @param ids - Arreglo de IDs de notas a eliminar.
+   * @returns Promesa que resuelve a un arreglo de notas eliminadas.
    */
   async removeMany(ids: string[]): Promise<Note[]> {
-    const notes = await this.readAllNotes();
+    const notes = await this.store.getAll();
     const idSet = new Set(ids);
 
     const remaining = notes.filter((n) => !idSet.has(n.id));
@@ -233,7 +202,7 @@ export class NotesRepository {
       return [];
     }
 
-    await fs.writeFile(dbPath, JSON.stringify(remaining, null, 2));
+    await this.store.saveAll(remaining);
     return removed;
   }
 }

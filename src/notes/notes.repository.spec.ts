@@ -1,77 +1,62 @@
 import { jest } from '@jest/globals';
-import { promises as fs } from 'fs';
 import { randomUUID } from 'crypto';
 import { NotesRepository } from './notes.repository';
-
-jest.mock('fs', () => {
-  const readFile = jest.fn();
-  const writeFile = jest.fn();
-  return { promises: { readFile, writeFile } };
-});
+import { NotesStore } from './stores/notes.store';
+import { Note } from './entities/note.entity';
+import { NoteFactory } from './factories/note.factory';
 
 jest.mock('crypto', () => ({
   randomUUID: jest.fn(() => 'mock-uuid'),
 }));
 
-type FsMock = {
-  readFile: jest.MockedFunction<typeof fs.readFile>;
-  writeFile: jest.MockedFunction<typeof fs.writeFile>;
-};
-
-type RawNote = {
-  id: string;
-  title: string;
-  content: string;
-  creationDate: string;
-  modificationDate: string;
-};
-
 describe('NotesRepository', () => {
-  const baseNotes: RawNote[] = [
+  const uuidMock = randomUUID as jest.Mock;
+  let repo: NotesRepository;
+  let store: jest.Mocked<NotesStore>;
+  let storeData: Note[];
+
+  const baseNotes = (): Note[] => [
     {
       id: 'n-1',
       title: 'Alpha',
       content: 'Content A',
-      creationDate: '2026-01-01T00:00:00.000Z',
-      modificationDate: '2026-01-01T00:00:00.000Z',
+      creationDate: new Date('2026-01-01T00:00:00.000Z'),
+      modificationDate: new Date('2026-01-01T00:00:00.000Z'),
     },
     {
       id: 'n-2',
       title: 'Beta',
       content: 'Content B',
-      creationDate: '2026-01-02T12:00:00.000Z',
-      modificationDate: '2026-01-02T12:00:00.000Z',
+      creationDate: new Date('2026-01-02T12:00:00.000Z'),
+      modificationDate: new Date('2026-01-02T12:00:00.000Z'),
     },
     {
       id: 'n-3',
       title: 'Gamma',
       content: 'Content C',
-      creationDate: '2026-01-03T06:00:00.000Z',
-      modificationDate: '2026-01-04T06:00:00.000Z',
+      creationDate: new Date('2026-01-03T06:00:00.000Z'),
+      modificationDate: new Date('2026-01-04T06:00:00.000Z'),
     },
   ];
 
-  const fsMock = fs as unknown as FsMock;
-  const uuidMock = randomUUID as jest.Mock;
-  let repo: NotesRepository;
-  let fileData: RawNote[];
-
-  const setFileData = (data: RawNote[]) => {
-    fileData = data;
-    fsMock.readFile.mockResolvedValue(JSON.stringify(fileData));
-    fsMock.writeFile.mockImplementation((_path: string, content: string) => {
-      fileData = JSON.parse(content) as RawNote[];
-      return Promise.resolve();
-    });
-  };
+  const cloneNote = (n: Note): Note => ({
+    ...n,
+    creationDate: new Date(n.creationDate),
+    modificationDate: new Date(n.modificationDate),
+  });
 
   beforeEach(() => {
     jest.useFakeTimers().setSystemTime(new Date('2026-01-10T10:00:00.000Z'));
-    repo = new NotesRepository();
-    fsMock.readFile.mockReset();
-    fsMock.writeFile.mockReset();
+    storeData = baseNotes();
+    store = {
+      getAll: jest.fn(async () => storeData.map(cloneNote)),
+      saveAll: jest.fn(async (notes: Note[]) => {
+        storeData = notes.map(cloneNote);
+      }),
+    } as jest.Mocked<NotesStore>;
+
+    repo = new NotesRepository(store, new NoteFactory());
     uuidMock.mockClear();
-    setFileData([...baseNotes]);
   });
 
   afterEach(() => {
@@ -152,7 +137,7 @@ describe('NotesRepository', () => {
     expect(created.modificationDate.toISOString()).toBe(
       '2026-01-10T10:00:00.000Z',
     );
-    expect(fsMock.writeFile).toHaveBeenCalledTimes(1);
+    expect(store.saveAll).toHaveBeenCalledTimes(1);
   });
 
   it('update modifies title/content and bumps modificationDate; null when missing', async () => {
@@ -166,40 +151,40 @@ describe('NotesRepository', () => {
     expect(updated?.creationDate.toISOString()).toBe(
       '2026-01-02T12:00:00.000Z',
     );
-    expect(fsMock.writeFile).toHaveBeenCalledTimes(1);
+    expect(store.saveAll).toHaveBeenCalledTimes(1);
 
-    fsMock.writeFile.mockClear();
+    store.saveAll.mockClear();
     const missing = await repo.update('missing', 'T', 'C');
     expect(missing).toBeNull();
-    expect(fsMock.writeFile).not.toHaveBeenCalled();
+    expect(store.saveAll).not.toHaveBeenCalled();
   });
 
   it('remove deletes a note by id or returns null when missing', async () => {
     const removed = await repo.remove('n-1');
     expect(removed?.id).toBe('n-1');
-    expect(fsMock.writeFile).toHaveBeenCalledTimes(1);
+    expect(store.saveAll).toHaveBeenCalledTimes(1);
 
-    fsMock.writeFile.mockClear();
+    store.saveAll.mockClear();
     const missing = await repo.remove('missing');
     expect(missing).toBeNull();
-    expect(fsMock.writeFile).not.toHaveBeenCalled();
+    expect(store.saveAll).not.toHaveBeenCalled();
   });
 
   it('removeMany deletes multiple and skips write when none found', async () => {
     const removed = await repo.removeMany(['n-2', 'n-3']);
     expect(removed.map((n) => n.id)).toEqual(['n-2', 'n-3']);
-    expect(fsMock.writeFile).toHaveBeenCalledTimes(1);
+    expect(store.saveAll).toHaveBeenCalledTimes(1);
 
-    fsMock.writeFile.mockClear();
+    store.saveAll.mockClear();
     const none = await repo.removeMany(['missing']);
     expect(none).toEqual([]);
-    expect(fsMock.writeFile).not.toHaveBeenCalled();
+    expect(store.saveAll).not.toHaveBeenCalled();
   });
 
   it('removeMany deletes only existing IDs when mixed', async () => {
     const removed = await repo.removeMany(['n-1', 'missing', 'n-3']);
     expect(removed.map((n) => n.id)).toEqual(['n-1', 'n-3']);
-    expect(fsMock.writeFile).toHaveBeenCalledTimes(1);
+    expect(store.saveAll).toHaveBeenCalledTimes(1);
   });
 
   it('findAllWithContent returns full notes including content', async () => {
@@ -222,9 +207,9 @@ describe('NotesRepository', () => {
     uuidMock.mockReturnValue('new-id-2');
     const created = await repo.create('Extra', 'More');
     expect(created.id).toBe('new-id-2');
-    expect(fsMock.writeFile).toHaveBeenCalledTimes(1);
+    expect(store.saveAll).toHaveBeenCalledTimes(1);
     // ensure previous notes remain
-    expect(fileData).toHaveLength(4);
-    expect(fileData.find((n) => n.id === 'n-1')).toBeDefined();
+    expect(storeData).toHaveLength(4);
+    expect(storeData.find((n) => n.id === 'n-1')).toBeDefined();
   });
 });

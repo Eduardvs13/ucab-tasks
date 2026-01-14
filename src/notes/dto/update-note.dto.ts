@@ -3,17 +3,17 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdateNoteDto {
   @ApiPropertyOptional({
-    description: 'The new title of the note.',
+    description: 'Nuevo título de la nota.',
     minLength: 3,
   })
   @IsOptional()
-  @IsString({ message: 'Title must be a string.' })
-  @IsNotEmpty({ message: 'Title cannot be empty.' })
-  @MinLength(3, { message: 'Title must have at least 3 characters.' })
+  @IsString({ message: 'El título debe ser una cadena.' })
+  @IsNotEmpty({ message: 'El título no puede estar vacío.' })
+  @MinLength(3, { message: 'El título debe tener al menos 3 caracteres.' })
   title?: string;
 
-  @ApiPropertyOptional({ description: 'The new content of the note.' })
+  @ApiPropertyOptional({ description: 'Nuevo contenido de la nota.' })
   @IsOptional()
-  @IsString({ message: 'Content must be a string.' })
+  @IsString({ message: 'El contenido debe ser una cadena.' })
   content?: string;
 }

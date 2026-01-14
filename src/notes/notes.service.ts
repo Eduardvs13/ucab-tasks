@@ -15,16 +15,16 @@ import { CreateNoteDto } from './dto/create-note.dto';
 import { UpdateNoteDto } from './dto/update-note.dto';
 
 /**
- * Service for handling note-related operations.
+ * Servicio para gestionar operaciones relacionadas con notas.
  */
 @Injectable()
 export class NotesService {
-  constructor(private readonly notesRepository: NotesRepository) {}
+  constructor(private readonly notesRepository: NotesRepository) { }
 
   /**
-   * Converts an internal Note object to an API-facing Note object.
-   * @param n - The internal Note object.
-   * @returns The API-facing Note object.
+   * Convierte un objeto `Note` interno a un objeto expuesto por la API.
+   * @param n - Objeto interno `Note`.
+   * @returns Objeto expuesto por la API.
    */
   private toApiNote(n: Note): ApiNote {
     return {
@@ -37,9 +37,9 @@ export class NotesService {
   }
 
   /**
-   * Converts an internal NoteSummary object to an API-facing NoteSummary object.
-   * @param n - The internal NoteSummary object.
-   * @returns The API-facing NoteSummary object.
+   * Convierte un objeto `NoteSummary` interno a un objeto expuesto por la API.
+   * @param n - Objeto interno `NoteSummary`.
+   * @returns Objeto expuesto por la API.
    */
   private toApiSummary(n: NoteSummary): ApiNoteSummary {
     return {
@@ -51,9 +51,9 @@ export class NotesService {
   }
 
   /**
-   * Retrieves all notes with optional filtering and sorting.
-   * @param options - Options for searching, sorting, and filtering.
-   * @returns A promise that resolves to an array of note summaries.
+   * Obtiene todas las notas con filtros y orden opcionales.
+   * @param options - Opciones de búsqueda, orden y filtros.
+   * @returns Promesa que resuelve a un arreglo de resúmenes de notas.
    */
   async getAllNotes(options?: {
     search?: string;
@@ -64,7 +64,7 @@ export class NotesService {
     updatedFrom?: string;
     updatedTo?: string;
   }): Promise<ApiNoteSummary[]> {
-    // translate API sort keys to internal storage keys
+    // traducir claves de orden de la API a claves internas de almacenamiento
     const internalSort =
       options?.sort === 'title'
         ? 'title'
@@ -89,25 +89,25 @@ export class NotesService {
   }
 
   /**
-   * Retrieves a single note by its ID.
-   * @param id - The ID of the note to retrieve.
-   * @returns A promise that resolves to the note.
+   * Obtiene una nota por su ID.
+   * @param id - ID de la nota a obtener.
+   * @returns Promesa que resuelve a la nota.
    */
   async getNoteById(id: string): Promise<ApiNote> {
     const note = await this.notesRepository.findOne(id);
     if (!note) {
-      throw new NotFoundException(`Note with ID "${id}" not found.`);
+      throw new NotFoundException(`Nota con ID "${id}" no encontrada.`);
     }
     return this.toApiNote(note);
   }
 
   /**
-   * Creates a new note.
-   * @param createNoteDto - The data for creating the note.
-   * @returns A promise that resolves to the created note.
+   * Crea una nueva nota.
+   * @param createNoteDto - Datos para crear la nota.
+   * @returns Promesa que resuelve a la nota creada.
    */
   async createNote(createNoteDto: CreateNoteDto): Promise<ApiNote> {
-    // DTO validation already applied by ValidationPipe
+    // La validación del DTO ya es aplicada por el ValidationPipe
     const created = await this.notesRepository.create(
       createNoteDto.title,
       createNoteDto.content,
@@ -116,15 +116,15 @@ export class NotesService {
   }
 
   /**
-   * Updates an existing note.
-   * @param id - The ID of the note to update.
-   * @param updateNoteDto - The data for updating the note.
-   * @returns A promise that resolves to the updated note.
+   * Actualiza una nota existente.
+   * @param id - ID de la nota a actualizar.
+   * @param updateNoteDto - Datos para actualizar la nota.
+   * @returns Promesa que resuelve a la nota actualizada.
    */
   async updateNote(id: string, updateNoteDto: UpdateNoteDto): Promise<ApiNote> {
     const existing = await this.notesRepository.findOne(id);
     if (!existing) {
-      throw new NotFoundException(`Note with ID "${id}" not found.`);
+      throw new NotFoundException(`Nota con ID "${id}" no encontrada.`);
     }
 
     const newTitle = updateNoteDto.title ?? existing.title;
@@ -132,15 +132,15 @@ export class NotesService {
 
     const updated = await this.notesRepository.update(id, newTitle, newContent);
     if (!updated) {
-      throw new NotFoundException(`Unable to update note with ID "${id}".`);
+      throw new NotFoundException(`No se pudo actualizar la nota con ID "${id}".`);
     }
     return this.toApiNote(updated);
   }
 
   /**
-   * Deletes one or more notes by their IDs.
-   * @param id - A comma-separated string of note IDs.
-   * @returns A promise that resolves to an array of the deleted notes.
+   * Elimina una o varias notas por sus IDs.
+   * @param id - Cadena con IDs de notas separados por coma.
+   * @returns Promesa que resuelve a un arreglo de notas eliminadas.
    */
   async deleteNote(id: string): Promise<ApiNote[]> {
     const ids = id
@@ -148,7 +148,7 @@ export class NotesService {
       .map((v) => v.trim())
       .filter(Boolean);
     if (ids.length === 0) {
-      throw new BadRequestException('At least one note id is required.');
+      throw new BadRequestException('Se requiere al menos un ID de nota.');
     }
 
     const uniqueIds = Array.from(new Set(ids));
@@ -158,7 +158,7 @@ export class NotesService {
       (uuid) => !allNotes.some((n) => n.id === uuid),
     );
     if (missing.length > 0) {
-      throw new NotFoundException(`Notes not found: ${missing.join(', ')}`);
+      throw new NotFoundException(`Notas no encontradas: ${missing.join(', ')}`);
     }
 
     // If only one id, use remove to reuse existing logic; otherwise removeMany
@@ -166,7 +166,7 @@ export class NotesService {
       const note = await this.notesRepository.remove(uniqueIds[0]);
       if (!note) {
         throw new NotFoundException(
-          `Note with ID "${uniqueIds[0]}" not found.`,
+          `Nota con ID "${uniqueIds[0]}" no encontrada.`,
         );
       }
       return [this.toApiNote(note)];
@@ -177,9 +177,9 @@ export class NotesService {
   }
 
   /**
-   * Exports all notes using a given strategy.
-   * @param strategy - The export strategy to use.
-   * @returns A promise that resolves to the exported data as a string.
+   * Exporta todas las notas usando una estrategia indicada.
+   * @param strategy - Estrategia de exportación a utilizar.
+   * @returns Promesa que resuelve a los datos exportados como cadena.
    */
   async exportNotes(strategy: ExportStrategy): Promise<string> {
     const notes = await this.notesRepository.findAllWithContent();

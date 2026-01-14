@@ -6,4 +6,4 @@ import { NotesModule } from './notes/notes.module';
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+export class AppModule { }

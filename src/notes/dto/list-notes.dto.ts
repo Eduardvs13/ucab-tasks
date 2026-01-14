@@ -3,61 +3,61 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class ListNotesQueryDto {
   @ApiPropertyOptional({
-    description: 'Search query to filter notes by title.',
+    description: 'Texto de búsqueda para filtrar notas por título.',
   })
   @IsOptional()
-  @IsString({ message: 'search must be a string.' })
+  @IsString({ message: 'search debe ser una cadena.' })
   search?: string;
 
   @ApiPropertyOptional({
-    description: 'Sort notes by title, creation date, or update date.',
+    description: 'Ordenar notas por título, fecha de creación o actualización.',
     enum: ['title', 'createdAt', 'updatedAt'],
   })
   @IsOptional()
   @IsIn(['title', 'createdAt', 'updatedAt'], {
-    message: 'sort must be one of: title, createdAt, updatedAt',
+    message: 'sort debe ser: title, createdAt o updatedAt',
   })
   sort?: 'title' | 'createdAt' | 'updatedAt';
 
   @ApiPropertyOptional({
-    description: 'Sort order.',
+    description: 'Dirección de orden.',
     enum: ['asc', 'desc'],
   })
   @IsOptional()
-  @IsIn(['asc', 'desc'], { message: 'order must be asc or desc' })
+  @IsIn(['asc', 'desc'], { message: 'order debe ser asc o desc' })
   order?: 'asc' | 'desc';
 
   @ApiPropertyOptional({
-    description: 'Filter notes created from this date (ISO 8601).',
+    description: 'Filtrar notas creadas desde esta fecha (ISO 8601).',
   })
   @IsOptional()
   @IsISO8601(
     {},
-    { message: 'createdFrom must be a valid ISO 8601 date string' },
+    { message: 'createdFrom debe ser una fecha válida en formato ISO 8601' },
   )
   createdFrom?: string;
 
   @ApiPropertyOptional({
-    description: 'Filter notes created up to this date (ISO 8601).',
+    description: 'Filtrar notas creadas hasta esta fecha (ISO 8601).',
   })
   @IsOptional()
-  @IsISO8601({}, { message: 'createdTo must be a valid ISO 8601 date string' })
+  @IsISO8601({}, { message: 'createdTo debe ser una fecha válida en formato ISO 8601' })
   createdTo?: string;
 
   @ApiPropertyOptional({
-    description: 'Filter notes updated from this date (ISO 8601).',
+    description: 'Filtrar notas actualizadas desde esta fecha (ISO 8601).',
   })
   @IsOptional()
   @IsISO8601(
     {},
-    { message: 'updatedFrom must be a valid ISO 8601 date string' },
+    { message: 'updatedFrom debe ser una fecha válida en formato ISO 8601' },
   )
   updatedFrom?: string;
 
   @ApiPropertyOptional({
-    description: 'Filter notes updated up to this date (ISO 8601).',
+    description: 'Filtrar notas actualizadas hasta esta fecha (ISO 8601).',
   })
   @IsOptional()
-  @IsISO8601({}, { message: 'updatedTo must be a valid ISO 8601 date string' })
+  @IsISO8601({}, { message: 'updatedTo debe ser una fecha válida en formato ISO 8601' })
   updatedTo?: string;
 }

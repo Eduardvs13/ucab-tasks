@@ -2,27 +2,11 @@
 import { jest } from '@jest/globals';
 import { NotesController } from './notes.controller';
 import { NotesService } from './notes.service';
-import { JsonExportStrategy } from './strategies/json-export.strategy';
-import { CsvExportStrategy } from './strategies/csv-export.strategy';
 import { CreateNoteDto } from './dto/create-note.dto';
 import { UpdateNoteDto } from './dto/update-note.dto';
 import { ListNotesQueryDto } from './dto/list-notes.dto';
-
-jest.mock('./strategies/json-export.strategy', () => {
-  const exportFn = jest.fn().mockReturnValue('json-export');
-  const MockStrategy = jest
-    .fn()
-    .mockImplementation(() => ({ export: exportFn }));
-  return { JsonExportStrategy: MockStrategy };
-});
-
-jest.mock('./strategies/csv-export.strategy', () => {
-  const exportFn = jest.fn().mockReturnValue('csv-export');
-  const MockStrategy = jest
-    .fn()
-    .mockImplementation(() => ({ export: exportFn }));
-  return { CsvExportStrategy: MockStrategy };
-});
+import { ExportStrategyFactory } from './strategies/export-strategy.factory';
+import { ExportStrategy } from './strategies/export.strategy';
 
 type NotesServiceMock = jest.Mocked<NotesService>;
 
@@ -31,10 +15,8 @@ type HeaderSetter = { setHeader: jest.Mock };
 describe('NotesController', () => {
   let controller: NotesController;
   let service: NotesServiceMock;
+  let factory: jest.Mocked<ExportStrategyFactory>;
   let res: HeaderSetter;
-
-  const jsonStrategyMock = JsonExportStrategy as unknown as jest.Mock;
-  const csvStrategyMock = CsvExportStrategy as unknown as jest.Mock;
 
   beforeEach(() => {
     service = {
@@ -46,11 +28,12 @@ describe('NotesController', () => {
       deleteNote: jest.fn(),
     } as unknown as NotesServiceMock;
 
-    controller = new NotesController(service);
-    res = { setHeader: jest.fn() };
+    factory = {
+      get: jest.fn(),
+    } as unknown as jest.Mocked<ExportStrategyFactory>;
 
-    jsonStrategyMock.mockClear();
-    csvStrategyMock.mockClear();
+    controller = new NotesController(service, factory);
+    res = { setHeader: jest.fn() };
   });
 
   it('getAll delega en el servicio con la query', async () => {
@@ -70,16 +53,20 @@ describe('NotesController', () => {
   it('exportNotes usa JSON por defecto y fija el content-type', async () => {
     service.exportNotes.mockResolvedValue('json-body');
 
+    const jsonStrategy: ExportStrategy = {
+      export: jest.fn(() => 'json-export'),
+    };
+    factory.get.mockReturnValue({ strategy: jsonStrategy, contentType: 'application/json' });
+
     const result = await controller.exportNotes('', res);
 
-    expect(jsonStrategyMock).toHaveBeenCalledTimes(1);
-    expect(csvStrategyMock).not.toHaveBeenCalled();
+    expect(factory.get).toHaveBeenCalledWith('');
     expect(res.setHeader).toHaveBeenCalledWith(
       'Content-Type',
       'application/json',
     );
     expect(service.exportNotes).toHaveBeenCalledWith(
-      expect.objectContaining({ export: expect.any(Function) }),
+      jsonStrategy,
     );
     expect(result).toBe('json-body');
   });
@@ -87,16 +74,23 @@ describe('NotesController', () => {
   it('exportNotes con format=csv usa CsvExportStrategy y content-type CSV', async () => {
     service.exportNotes.mockResolvedValue('csv-body');
 
+    const csvStrategy: ExportStrategy = {
+      export: jest.fn(() => 'csv-export'),
+    };
+    factory.get.mockReturnValue({
+      strategy: csvStrategy,
+      contentType: 'text/csv; charset=utf-8',
+    });
+
     const result = await controller.exportNotes('csv', res);
 
-    expect(jsonStrategyMock).toHaveBeenCalledTimes(1); // se instancia por defecto antes de evaluar el formato
-    expect(csvStrategyMock).toHaveBeenCalledTimes(1);
+    expect(factory.get).toHaveBeenCalledWith('csv');
     expect(res.setHeader).toHaveBeenCalledWith(
       'Content-Type',
       'text/csv; charset=utf-8',
     );
     expect(service.exportNotes).toHaveBeenCalledWith(
-      expect.objectContaining({ export: expect.any(Function) }),
+      csvStrategy,
     );
     expect(result).toBe('csv-body');
   });
