@@ -1,98 +1,301 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+## Ucab Tasks - API de Notas
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+API REST en NestJS para gestionar notas (CRUD, filtros, exportación JSON/CSV). Pensada como prototipo extensible: cambio de backend de datos sin tocar la lógica, documentación viva con Swagger y código auto-validado con DTOs.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Requisitos (para ejecutar el prototipo)
 
-## Description
+- Node.js >= 18 (recomendado 20 LTS).
+- npm >= 10.
+- Git para clonar el repositorio.
+- Sin motor de base de datos externo: se usa el archivo local [database/notes.json](database/notes.json). Solo necesitas permisos de lectura/escritura en ese archivo.
+- Opcional: [Nest CLI](https://docs.nestjs.com/cli/overview) si prefieres usar comandos `nest`.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Puesta en marcha local (paso a paso)
 
-## Project setup
+1. Clona el repo y entra en la carpeta
 
 ```bash
-$ npm install
+git clone <url-del-repositorio>
+cd ucab-tasks
 ```
 
-## Compile and run the project
+2. Instala dependencias
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm install
 ```
 
-## Run tests
+3. Arranca en desarrollo (watch)
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm run start:dev
 ```
 
-## Deployment
+- Base URL: http://localhost:3000
+- Swagger UI: http://localhost:3000/api
+- Variable opcional: `PORT` para cambiar el puerto.
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+4. Ejecuta pruebas
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+npm test          # unitarias
+npm run test:e2e  # end-to-end
+npm run test -- <ruta-al-spec> # test específico
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## Notas
 
-## Resources
+| Método | Ruta          | Descripción                                                                                                                                                                        |
+| :----- | :------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | /notes        | Lista notas con filtros opcionales: `search`, `sort` (title, createdAt, updatedAt), `order` (asc, desc), `createdFrom`, `createdTo`, `updatedFrom`, `updatedTo` (fechas ISO 8601). |
+| GET    | /notes/export | Exporta notas. Parámetro `format=csv` para CSV; por defecto JSON.                                                                                                                  |
+| GET    | /notes/:id    | Obtiene una nota por UUID.                                                                                                                                                         |
+| POST   | /notes        | Crea una nota. Campos: `title` (min 3), `content`.                                                                                                                                 |
+| PUT    | /notes/:id    | Actualiza título y/o contenido.                                                                                                                                                    |
+| DELETE | /notes/:id    | Elimina una o varias notas (IDs separados por coma).                                                                                                                               |
 
-Check out a few resources that may come in handy when working with NestJS:
+## Ejemplos de Requests y Responses
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+### Crear nota
 
-## Support
+Request
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```bash
+curl -X POST http://localhost:3000/notes \
+	-H "Content-Type: application/json" \
+	-d '{
+		"title": "My note title",
+		"content": "Detailed content"
+	}'
+```
 
-## Stay in touch
+Response 201
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+```json
+{
+  "id": "c1f7b0f8-7a3e-4a9c-9d3d-2c8f3d1b9a10",
+  "title": "My note title",
+  "content": "Detailed content",
+  "createdAt": "2026-01-13T12:00:00.000Z",
+  "updatedAt": "2026-01-13T12:00:00.000Z"
+}
+```
 
-## License
+Error 400 (validación)
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+```json
+{
+  "statusCode": 400,
+  "message": ["Title must have at least 3 characters."],
+  "error": "Bad Request"
+}
+```
+
+### Listar notas (filtros y orden)
+
+Request
+
+```bash
+curl "http://localhost:3000/notes?search=note&sort=createdAt&order=desc"
+```
+
+Response 200
+
+```json
+[
+  {
+    "id": "c1f7b0f8-7a3e-4a9c-9d3d-2c8f3d1b9a10",
+    "title": "My note title",
+    "createdAt": "2026-01-13T12:00:00.000Z",
+    "updatedAt": "2026-01-13T12:10:00.000Z"
+  }
+]
+```
+
+### Obtener nota por ID
+
+Request
+
+```bash
+curl http://localhost:3000/notes/c1f7b0f8-7a3e-4a9c-9d3d-2c8f3d1b9a10
+```
+
+Response 200
+
+```json
+{
+  "id": "c1f7b0f8-7a3e-4a9c-9d3d-2c8f3d1b9a10",
+  "title": "My note title",
+  "content": "Detailed content",
+  "createdAt": "2026-01-13T12:00:00.000Z",
+  "updatedAt": "2026-01-13T12:10:00.000Z"
+}
+```
+
+Error 404
+
+```json
+{
+  "statusCode": 404,
+  "message": "Note not found",
+  "error": "Not Found"
+}
+```
+
+### Actualizar nota
+
+Request
+
+```bash
+curl -X PUT http://localhost:3000/notes/c1f7b0f8-7a3e-4a9c-9d3d-2c8f3d1b9a10 \
+	-H "Content-Type: application/json" \
+	-d '{
+		"title": "Updated title"
+	}'
+```
+
+Response 200
+
+```json
+{
+  "id": "c1f7b0f8-7a3e-4a9c-9d3d-2c8f3d1b9a10",
+  "title": "Updated title",
+  "content": "Detailed content",
+  "createdAt": "2026-01-13T12:00:00.000Z",
+  "updatedAt": "2026-01-13T12:20:00.000Z"
+}
+```
+
+### Eliminar notas (una o varias)
+
+Request (múltiples IDs separados por coma)
+
+```bash
+curl -X DELETE http://localhost:3000/notes/c1f7b0f8-7a3e-4a9c-9d3d-2c8f3d1b9a10,c9aa2f52-1e6c-4f3c-8e47-0b9c1c2d3e4f
+```
+
+Response 200
+
+```json
+[
+  {
+    "id": "c1f7b0f8-7a3e-4a9c-9d3d-2c8f3d1b9a10",
+    "title": "Updated title",
+    "content": "Detailed content",
+    "createdAt": "2026-01-13T12:00:00.000Z",
+    "updatedAt": "2026-01-13T12:20:00.000Z"
+  },
+  {
+    "id": "c9aa2f52-1e6c-4f3c-8e47-0b9c1c2d3e4f",
+    "title": "Another note",
+    "content": "More content",
+    "createdAt": "2026-01-13T11:00:00.000Z",
+    "updatedAt": "2026-01-13T11:05:00.000Z"
+  }
+]
+```
+
+### Exportar notas
+
+JSON (por defecto)
+
+```bash
+curl "http://localhost:3000/notes/export"
+```
+
+Response 200 (Content-Type: application/json)
+
+```json
+[
+  {
+    "id": "c1f7b0f8-7a3e-4a9c-9d3d-2c8f3d1b9a10",
+    "title": "Updated title",
+    "content": "Detailed content",
+    "createdAt": "2026-01-13T12:00:00.000Z",
+    "updatedAt": "2026-01-13T12:20:00.000Z"
+  }
+]
+```
+
+CSV
+
+```bash
+curl "http://localhost:3000/notes/export?format=csv"
+```
+
+Response 200 (Content-Type: text/csv)
+
+```
+id,title,content,createdAt,updatedAt
+c1f7b0f8-7a3e-4a9c-9d3d-2c8f3d1b9a10,Updated title,Detailed content,2026-01-13T12:00:00.000Z,2026-01-13T12:20:00.000Z
+c9aa2f52-1e6c-4f3c-8e47-0b9c1c2d3e4f,Another note,More content,2026-01-13T11:00:00.000Z,2026-01-13T11:05:00.000Z
+```
+
+## Arquitectura y patrones
+
+- **Validación y documentación**: DTOs con `class-validator` y `@ApiProperty*`; Swagger configurado en `/api` ([src/main.ts](src/main.ts)).
+- **Repository**: [src/notes/notes.repository.ts](src/notes/notes.repository.ts) centraliza búsqueda, filtros, orden y borrado múltiple; evita duplicar lógica en el servicio y aísla el acceso a datos.
+- **Separación de capas**: Controlador -> Servicio -> Repositorio -> Store (adapter). El controlador no conoce la fuente de datos; el repositorio encapsula filtros/orden.
+- **Adapter para datos**: `NotesStore` + `FileNotesAdapter` (JSON local). Permite sustituir por otro backend (p.ej., Mongo) sin tocar la lógica ([src/notes/stores](src/notes/stores)).
+- **Factory**: `NoteFactory` (invariantes de notas) y `ExportStrategyFactory` (elige JSON/CSV y content-type) ([src/notes/factories](src/notes/factories), [src/notes/strategies/export-strategy.factory.ts](src/notes/strategies/export-strategy.factory.ts)).
+- **Strategy**: exportación JSON/CSV desacoplada del controlador ([src/notes/strategies](src/notes/strategies)).
+
+## Datos y operación
+
+- Persistencia en [database/notes.json](database/notes.json); se incluye un archivo de ejemplo.
+- Validación estricta: propiedades extra se rechazan; UUID validado en rutas.
+- Exportación: `format=csv` devuelve CSV; si no se envía, se entrega JSON.
+
+## Calidad y pruebas
+
+- Código comentado con JSDoc en funciones y métodos implementados (requisito del enunciado).
+- Cobertura alta y pruebas para controlador, servicio, repositorio, estrategias, factory, adapter, bootstrap.
+
+### Cobertura de pruebas
+
+- Ejecutar cobertura:
+
+```bash
+npm run test:cov
+```
+
+- Reporte: resumen en consola y artefactos en `coverage/`.
+- HTML (si está habilitado): abrir `coverage/lcov-report/index.html` en el navegador.
+- Lcov: `coverage/lcov.info` para integraciones con CI.
+
+### ESLint
+
+- Configuración: [eslint.config.mjs](eslint.config.mjs) (TypeScript + Prettier recomendado).
+- Ejecutar análisis y autofix:
+
+```bash
+npm run lint
+```
+
+- Formateo con Prettier:
+
+```bash
+npm run format
+```
+
+## Documentación de código (TypeDoc)
+
+- Generar documentación HTML:
+
+```bash
+npm install --save-dev typedoc
+npm run docs
+```
+
+- Abrir en el navegador: `docs/index.html`.
+- Configuración: [typedoc.json](typedoc.json). Incluye solo `src/` y excluye pruebas.
+
+## Cómo extender
+
+- Nuevo backend de datos: implementa `NotesStore` (ej. Mongo) y reemplaza la clase inyectada en el provider `NOTES_STORE`.
+- Nuevo formato de exportación: crea una clase que implemente `ExportStrategy` y añádela a la factory.
+
+## Enlace rápido
+
+- Swagger UI: http://localhost:3000/api
+- Datos locales: [database/notes.json](database/notes.json)
