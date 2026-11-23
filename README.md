@@ -1,6 +1,23 @@
-## Ucab Tasks - API de Notas
+# Ucab Tasks · API REST de notas en NestJS
 
-API REST en NestJS para gestionar notas (CRUD, filtros, exportación JSON/CSV). Pensada como prototipo extensible: cambio de backend de datos sin tocar la lógica, documentación viva con Swagger y código auto-validado con DTOs.
+API REST para gestionar notas: crear, listar con filtros y orden, actualizar, borrar una o varias y exportar a JSON o CSV. Proyecto en equipo para la materia Tópicos de Programación (UCAB, enero de 2026), diseñado para que la fuente de datos y los formatos de exportación se puedan cambiar sin tocar la lógica.
+
+![Swagger UI de la API de notas](.github/assets/swagger.jpg)
+
+## En resumen
+
+- **Stack:** NestJS 11, TypeScript, class-validator, Swagger (OpenAPI 3), Jest y Supertest, ESLint, Prettier y TypeDoc.
+- **Diseño:** capas Controlador → Servicio → Repositorio → Store. El almacenamiento queda detrás de la interfaz `NotesStore`, inyectada por token. Patrones Repository, Adapter, Factory y Strategy (detalle en [Arquitectura y patrones](#arquitectura-y-patrones)).
+- **Pruebas:** 41 unitarias y 12 end to end, todas en verde (verificado el 2026-11-22 con Node 24).
+- **Equipo:** 3 personas: [Eduard Velasco](https://github.com/Eduardvs13), [cereandel](https://github.com/cereandel) y [sebaimmortal098](https://github.com/sebaimmortal098).
+
+## Mi parte
+
+Según el historial del repositorio:
+
+- Inicialicé el proyecto NestJS y definí su estructura.
+- Limpié el repositorio y reforcé los tipos de lo que exporta cada módulo.
+- Escribí las pruebas del controlador, el servicio, el repositorio y las estrategias de exportación JSON y CSV, y las pruebas end to end, ajustando la API a lo que esas pruebas exigían.
 
 ## Requisitos (para ejecutar el prototipo)
 
@@ -15,7 +32,7 @@ API REST en NestJS para gestionar notas (CRUD, filtros, exportación JSON/CSV). 
 1. Clona el repo y entra en la carpeta
 
 ```bash
-git clone <url-del-repositorio>
+git clone https://github.com/Eduardvs13/ucab-tasks.git
 cd ucab-tasks
 ```
 
@@ -55,6 +72,9 @@ npm run test -- <ruta-al-spec> # test específico
 | DELETE | /notes/:id    | Elimina una o varias notas (IDs separados por coma).                                                                                                                               |
 
 ## Ejemplos de Requests y Responses
+
+<details>
+<summary>Ver ejemplos de cada endpoint</summary>
 
 ### Crear nota
 
@@ -231,6 +251,8 @@ c1f7b0f8-7a3e-4a9c-9d3d-2c8f3d1b9a10,Updated title,Detailed content,2026-01-13T1
 c9aa2f52-1e6c-4f3c-8e47-0b9c1c2d3e4f,Another note,More content,2026-01-13T11:00:00.000Z,2026-01-13T11:05:00.000Z
 ```
 
+</details>
+
 ## Arquitectura y patrones
 
 - **Validación y documentación**: DTOs con `class-validator` y `@ApiProperty*`; Swagger configurado en `/api` ([src/main.ts](src/main.ts)).
@@ -283,7 +305,6 @@ npm run format
 - Generar documentación HTML:
 
 ```bash
-npm install --save-dev typedoc
 npm run docs
 ```
 
@@ -299,3 +320,7 @@ npm run docs
 
 - Swagger UI: http://localhost:3000/api
 - Datos locales: [database/notes.json](database/notes.json)
+
+## Licencia
+
+[MIT](LICENSE)
